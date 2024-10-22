@@ -1,5 +1,9 @@
-# Maven target folder
-/Transformation/target/
+# Transformation
+/target/
+/src/.scanner*
+.classpath
+.project
+.settings/
 
 # Log files
 *.log
@@ -21,30 +25,9 @@ Thumbs.db
 # Backup files
 *.bak
 
-# Zip and dump files
-*.zip
-/config/dump/
-
-/config/zip/
-
-# Specific files that shouldn't be included
-/config/hashcode.csv
-/config/hashcode.xlsx
-
-# Compiled Java class files
-/Transformation/target/classes/
-/Transformation/target/test-classes/
-
-# Dependency JAR files
-/Transformation/dependency-jars/
-
 # IDE and Editor specific folders
 /.idea/
 /.vscode/
-
-# Ignore backup scripts and SQL dumps
-/Utils/script/backup.sh
-/Utils/sql/
 
 # Any file that contains sensitive or unnecessary data
 *.key
