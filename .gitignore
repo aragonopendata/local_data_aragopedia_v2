@@ -1,0 +1,61 @@
+# Maven target folder
+/Transformation/target/
+
+# Log files
+*.log
+logs/
+log/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Environment variable files
+.env
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+
+# Backup files
+*.bak
+
+# Zip and dump files
+*.zip
+/config/dump/
+
+/config/zip/
+
+# Specific files that shouldn't be included
+/config/hashcode.csv
+/config/hashcode.xlsx
+
+# Compiled Java class files
+/Transformation/target/classes/
+/Transformation/target/test-classes/
+
+# Dependency JAR files
+/Transformation/dependency-jars/
+
+# IDE and Editor specific folders
+/.idea/
+/.vscode/
+
+# Ignore backup scripts and SQL dumps
+/Utils/script/backup.sh
+/Utils/sql/
+
+# Any file that contains sensitive or unnecessary data
+*.key
+*.pem
+*.crt
+*.p12
+
+# Maven specific files
+.mvn/
+.settings/
+.idea/
+
+# Miscellaneous
+*.iml
