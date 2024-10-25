@@ -252,10 +252,10 @@ public class TransformToRDF {
 
 									//String pattern = "([0-9]+)(-)(.*?)";
 
-	                                //String pattern = "([0-9]+)(-)(.*)";
+	                                String pattern = "([0-9]+)(-)(.*)";
 
 
-									String pattern = "([0-9]+)-([^\\s]+)";
+									//String pattern = "([0-9]+)-([^\\s]+)";
 									Pattern r = Pattern.compile(pattern);
 									Matcher m = r.matcher(cell);
 
