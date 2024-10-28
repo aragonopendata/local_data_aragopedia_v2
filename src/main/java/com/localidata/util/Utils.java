@@ -275,13 +275,7 @@ public class Utils {
 			return null;
 		}
 		try {
-			//String hash = DatatypeConverter.printHexBinary(MessageDigest.getInstance("SHA-1").digest(id.getBytes("UTF-8")));
-
-			MessageDigest digest = MessageDigest.getInstance("SHA-256");
-			byte[] hashBytes = digest.digest(id.getBytes("UTF-8"));
-			String hash = DatatypeConverter.printHexBinary(hashBytes);
-
-
+			String hash = DatatypeConverter.printHexBinary(MessageDigest.getInstance("SHA-1").digest(id.getBytes("UTF-8")));
 			uuid = UUID.nameUUIDFromBytes(hash.getBytes());
 		} catch (NoSuchAlgorithmException e) {
 			log.error("Error generating a UUID hash with id:" + id, e);
@@ -291,6 +285,33 @@ public class Utils {
 
 		return uuid.toString();
 	}
+
+	// public static String genUUIDHash(String id) {
+
+		
+	// 	UUID uuid = null;
+
+	// 	if (!v(id)) {
+	// 		log.error("Invalid ID generating a UUID");
+	// 		return null;
+	// 	}
+	// 	try {
+	// 		//String hash = DatatypeConverter.printHexBinary(MessageDigest.getInstance("SHA-1").digest(id.getBytes("UTF-8")));
+
+	// 		MessageDigest digest = MessageDigest.getInstance("SHA-256");
+	// 		byte[] hashBytes = digest.digest(id.getBytes("UTF-8"));
+	// 		String hash = DatatypeConverter.printHexBinary(hashBytes);
+
+
+	// 		uuid = UUID.nameUUIDFromBytes(hash.getBytes());
+	// 	} catch (NoSuchAlgorithmException e) {
+	// 		log.error("Error generating a UUID hash with id:" + id, e);
+	// 	} catch (UnsupportedEncodingException e) {
+	// 		log.error("Error generating a UUID hash with id:" + id, e);
+	// 	}
+
+	// 	return uuid.toString();
+	// }
 	
 	public static boolean v(Object c) {
 
@@ -478,13 +499,8 @@ public class Utils {
 
 		CloseableHttpClient httpclient = HttpClients.custom().setDefaultCookieStore(cookieStore).build();
 
-		String user = "granpublico";
-		String password = System.getenv("NQ_PASSWORD");
-
 		try {
-			HttpGet httpget = new HttpGet("http://bi.aragon.es/analytics/saw.dll?Go&path=/shared/IAEST-PUBLICA/Estadistica%20Local/03/030018TP&Action=Download&Options=df&NQUser=" + user + "&NQPassword=" + password);
-
-			//HttpGet httpget = new HttpGet("http://bi.aragon.es/analytics/saw.dll?Go&path=/shared/IAEST-PUBLICA/Estadistica%20Local/03/030018TP&Action=Download&Options=df&NQUser=granpublico&NQPassword=granpublico");
+			HttpGet httpget = new HttpGet("http://bi.aragon.es/analytics/saw.dll?Go&path=/shared/IAEST-PUBLICA/Estadistica%20Local/03/030018TP&Action=Download&Options=df&NQUser=granpublico&NQPassword=granpublico");
 			httpget.addHeader("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.86 Safari/537.36");
 			httpget.addHeader(
 					"Cookie",
@@ -1066,73 +1082,37 @@ public class Utils {
 	}
 	
 	public static String generateHash(String original) {
-//
-//		StringBuffer sb = new StringBuffer();
-//		MessageDigest md = null;
-//
-//		ArrayList<String> lineas = new ArrayList<>();
-//		String[] splitOriginal = original.split(System.lineSeparator());
-//		for(int h=0;h<splitOriginal.length;h++){
-//			lineas.add(splitOriginal[h]);
-//		}
-//		Collections.sort(lineas);
-//
-//		String originalOrdenado = "";
-//		for(String line : lineas){
-//			originalOrdenado += line+System.lineSeparator();
-//		}
-//
-//		try {
-//			md = MessageDigest.getInstance("MD5");
-//
-//		} catch (NoSuchAlgorithmException e) {
-//			log.error("Error with hash algorith", e);
-//		}
-//
-//		if (md != null) {
-//			md.update(originalOrdenado.getBytes());
-//			byte[] digest = md.digest();
-//
-//			for (byte b : digest) {
-//				sb.append(String.format("%02x", b & 0xff));
-//			}
-//		}
-//		return sb.toString();
 
-		StringBuilder sb = new StringBuilder();
-		MessageDigest md;
-
-		// Separar las líneas y ordenarlas
+		StringBuffer sb = new StringBuffer();
+		MessageDigest md = null;
+		
 		ArrayList<String> lineas = new ArrayList<>();
 		String[] splitOriginal = original.split(System.lineSeparator());
-		Collections.addAll(lineas, splitOriginal);  // Agregar todas las líneas directamente
-
-		Collections.sort(lineas);  // Ordenar las líneas
-
-		// Crear una cadena ordenada
-		StringBuilder originalOrdenado = new StringBuilder();
-		for (String line : lineas) {
-			originalOrdenado.append(line).append(System.lineSeparator());
+		for(int h=0;h<splitOriginal.length;h++){
+			lineas.add(splitOriginal[h]);
+		}
+		Collections.sort(lineas);
+		
+		String originalOrdenado = "";
+		for(String line : lineas){
+			originalOrdenado += line+System.lineSeparator();
+		}
+		
+		try {
+			md = MessageDigest.getInstance("MD5");
+		} catch (NoSuchAlgorithmException e) {
+			log.error("Error with hash algorith", e);
 		}
 
-		try {
-			md = MessageDigest.getInstance("SHA-256");  // Cambiar MD5 a SHA-256
-			md.update(originalOrdenado.toString().getBytes("UTF-8"));  // Asegurar codificación UTF-8
+		if (md != null) {
+			md.update(originalOrdenado.getBytes());
 			byte[] digest = md.digest();
 
-			// Convertir el digest a hexadecimal
 			for (byte b : digest) {
 				sb.append(String.format("%02x", b & 0xff));
 			}
-		} catch (NoSuchAlgorithmException e) {
-			log.error("Error with hash algorithm", e);
-			return null;  // Retornar null en caso de error
-		} catch (java.io.UnsupportedEncodingException e) {
-			log.error("Unsupported encoding", e);
-			return null;  // Retornar null en caso de error
 		}
-
-		return sb.toString();  // Retornar el hash generado
+		return sb.toString();
 	}
 	
 	public static List<String> removeChar(List<String> list, String string) {
