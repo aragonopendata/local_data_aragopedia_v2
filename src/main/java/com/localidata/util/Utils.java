@@ -587,43 +587,18 @@ public class Utils {
 			    }
 			    @Override
 			    public void checkClientTrusted(X509Certificate[] certs, String authType) {
-
-					for (X509Certificate cert : certs) {
-						try {
-							cert.checkValidity();
-
-						} catch (Exception e) {
-							throw new SecurityException("El certificado del cliente no es válido", e);
-						}
-					}
 			    }
 			    @Override
 			    public void checkServerTrusted(X509Certificate[] certs, String authType) {
-					for (X509Certificate cert : certs) {
-						try {
-							cert.checkValidity(); // Verifica si el certificado no está expirado
-							// Agrega lógica adicional para verificar el emisor, etc.
-						} catch (Exception e) {
-							throw new SecurityException("El certificado del servidor no es válido", e);
-						}
-					}
 			    }
 			} };
-	//    try {
-	// 	   SSLContext sc = SSLContext.getInstance("SSL");
-	// 	   sc.init(null, trustAllCerts, new SecureRandom());
-	// 	   HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-	//    } catch (Exception e) {
+	   try {
+		   SSLContext sc = SSLContext.getInstance("SSL");
+		   sc.init(null, trustAllCerts, new SecureRandom());
+		   HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+	   } catch (Exception e) {
 		   
-	//    }
-	try {
-		SSLContext sc = SSLContext.getInstance("TLSv1.2");  // También puedes usar "TLSv1.3" si está disponible
-		sc.init(null, null, new java.security.SecureRandom());
-		SSLSocketFactory sslSocketFactory = sc.getSocketFactory();
-		// Usa sslSocketFactory según sea necesario
-	} catch (NoSuchAlgorithmException | KeyManagementException e) {
-		e.printStackTrace();
-	}
+	   }
 	   
 		String output = null;
 		HttpsURLConnection httpsConnection = null;
@@ -679,6 +654,108 @@ public class Utils {
 		return output;
 
 	}
+
+	// public static String processURLGet(String url, String urlParameters, Map<String, String> headers, Cookies cookies, String encoding) throws SocketTimeoutException {
+	// 	//Security SSL
+	// 	TrustManager[] trustAllCerts = { new X509TrustManager() {
+	// 		    @Override
+	// 			public X509Certificate[] getAcceptedIssuers() {
+	// 		        return null;
+	// 		    }
+	// 		    @Override
+	// 		    public void checkClientTrusted(X509Certificate[] certs, String authType) {
+
+	// 				for (X509Certificate cert : certs) {
+	// 					try {
+	// 						cert.checkValidity();
+
+	// 					} catch (Exception e) {
+	// 						throw new SecurityException("El certificado del cliente no es válido", e);
+	// 					}
+	// 				}
+	// 		    }
+	// 		    @Override
+	// 		    public void checkServerTrusted(X509Certificate[] certs, String authType) {
+	// 				for (X509Certificate cert : certs) {
+	// 					try {
+	// 						cert.checkValidity(); // Verifica si el certificado no está expirado
+	// 						// Agrega lógica adicional para verificar el emisor, etc.
+	// 					} catch (Exception e) {
+	// 						throw new SecurityException("El certificado del servidor no es válido", e);
+	// 					}
+	// 				}
+	// 		    }
+	// 		} };
+	// //    try {
+	// // 	   SSLContext sc = SSLContext.getInstance("SSL");
+	// // 	   sc.init(null, trustAllCerts, new SecureRandom());
+	// // 	   HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+	// //    } catch (Exception e) {
+		   
+	// //    }
+	// try {
+	// 	SSLContext sc = SSLContext.getInstance("TLSv1.2");  // También puedes usar "TLSv1.3" si está disponible
+	// 	sc.init(null, null, new java.security.SecureRandom());
+	// 	SSLSocketFactory sslSocketFactory = sc.getSocketFactory();
+	// 	// Usa sslSocketFactory según sea necesario
+	// } catch (NoSuchAlgorithmException | KeyManagementException e) {
+	// 	e.printStackTrace();
+	// }
+	   
+	// 	String output = null;
+	// 	HttpsURLConnection httpsConnection = null;
+	// 	try {
+	// 		URL targetUrl = null;
+	// 		if ((urlParameters == null) || (urlParameters.equals(""))) {
+	// 			targetUrl = new URL(url);
+	// 		} else {
+	// 			targetUrl = new URL(url + "?" + urlParameters);
+	// 		}
+
+	// 		httpsConnection = (HttpsURLConnection) targetUrl.openConnection();
+	// 		httpsConnection.setDoOutput(true);
+	// 		httpsConnection.setRequestMethod("GET");
+	// 		if (headers != null) {
+	// 			Iterator<Entry<String, String>> it = headers.entrySet().iterator();
+	// 			while (it.hasNext()) {
+	// 				Map.Entry<String, String> pairs = (Map.Entry<String, String>) it.next();
+	// 				httpsConnection.setRequestProperty(pairs.getKey(), pairs.getValue());
+	// 			}
+	// 		}
+	// 		cookies.setCookies(httpsConnection);
+	// 		httpsConnection.setConnectTimeout(defaultTimeOut);
+	// 		httpsConnection.setReadTimeout(defaultReadTimeOut);
+
+	// 		InputStream is = httpsConnection.getInputStream();
+
+	// 		output = IOUtils.toString(is, encoding);
+
+	// 		cookies.storeCookies(httpsConnection);
+			
+			
+
+	// 		if (httpsConnection.getResponseCode() != 200) {
+	// 			log.error("The URI does not return a 200 code");
+	// 			log.error(output);
+	// 			return "";
+	// 		}
+
+	// 	} catch (MalformedURLException e) {
+	// 		log.error("Error with the URI: " + url + "?" + urlParameters, e);
+
+	// 	} catch (SocketTimeoutException e) {
+	// 		throw e;
+
+	// 	} catch (IOException e) {
+	// 		log.error("IOError: " + url + "?" + urlParameters, e);
+			
+	// 	} finally {
+	// 		httpsConnection.disconnect();
+	// 	}
+
+	// 	return output;
+
+	// }
 
 	public static String processURLGet(String url, String urlParameters, Map<String, String> headers) {
 

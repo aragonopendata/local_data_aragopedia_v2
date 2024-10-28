@@ -181,19 +181,22 @@ public class TransformToRDF {
 	}
 
 	private StringBuffer addObservation(String line, String fileName) {
-		log.debug("Init addObservation " + line + " " + fileName);
+		log.info("Init addObservation " + line + " " + fileName);
 		StringBuffer result = new StringBuffer();
 		String endResult = "";
 		boolean year = false;
 		boolean month = false;
 		String cleanLine = Utils.weakClean(line);
 		if (cleanLine.equals("")) {
-			log.debug("End addObservation");
+			log.info("End addObservation");
 			return result;
 		}
 		String id = Utils.genUUIDHash(cleanLine);
+		log.info("id: " + id);
 		result.append("<" + Prop.host + "/" + Prop.eldaName + "/" + Prop.datasetName + "/observacion/" + fileName + "/" + id + "> a qb:Observation ;" + "\n");
 		result.append("\tqb:dataSet <" + cubo + ">; \n");
+
+		log.info("result: " + result);
 
 		String[] cells = cleanLine.split("\t");
 		int col = 1;
@@ -203,6 +206,9 @@ public class TransformToRDF {
 	    for (i = (arrayOfString1 = cells).length, b = 0; b < i; ) {
 	        String cell = arrayOfString1[b];
 	        String normalizedCell = Utils.urlify(cell);
+
+			log.info("normalizedCell: " + normalizedCell);
+
 	        if (this.normalizedHeader.size() <= col - 1) {
 	          insertError(String.valueOf(fileName) + ". ERROR. " + "COLUMN NAME MISSING  ");
 	          log.error(String.valueOf(fileName) + ". ERROR. " + "COLUMN NAME MISSING  ");
@@ -210,6 +216,8 @@ public class TransformToRDF {
 	        	String header = this.normalizedHeader.get(col - 1);
 	            this.cleanHeader.get(col - 1);
 	            DataBean dataBean = (DataBean)this.configBean.getMapData().get(header);
+
+				log.info("header: " + header);
 	            try {
 	            	if (dataBean != null) {
 	            		if (dataBean.getNormalizacion() != null)
