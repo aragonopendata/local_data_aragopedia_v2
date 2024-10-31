@@ -11,9 +11,9 @@ import java.time.Duration;
 
 public class OpenTelemetryConfig {
 
-    private static String jaegerEndpoint = Prop.jaegerEndpoint;
+    private static String jaegerEndpoint = "";
 
-    public static void initOpenTelemetry() {
+    public static void initOpenTelemetry(jaegerEndpoint) {
 
         JaegerGrpcSpanExporter jaegerExporter = JaegerGrpcSpanExporter.builder()
                 .setEndpoint(jaegerEndpoint)

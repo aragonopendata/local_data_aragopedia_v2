@@ -30,7 +30,7 @@ public class Process {
 
 		Prop.loadConf(); 
 
-		OpenTelemetryConfig.initOpenTelemetry();
+		OpenTelemetryConfig.initOpenTelemetry(Prop.jaegerEndpoint);
         Tracer tracer = GlobalOpenTelemetry.getTracer("com.localidata.generic.Process");
 
 
