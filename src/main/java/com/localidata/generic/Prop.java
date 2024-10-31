@@ -63,6 +63,8 @@ public class Prop {
 	public static int limitCubeSize = 100000;
 	public static int defaultTimeOut = 5000;
 	public static int readTimeOut = 30000;
+
+	// public static String jaegerEndpoint = "";
 	
 	
 	public static boolean loadConf() {
@@ -127,6 +129,8 @@ public class Prop {
 			limitCubeSize = Integer.parseInt(prop.getProperty("limitCubeSize"));
 			defaultTimeOut = Integer.parseInt(prop.getProperty("defaultTimeOut"));
 			readTimeOut = Integer.parseInt(prop.getProperty("readTimeOut"));
+
+			//jaegerEndpoint = prop.getProperty("jaeger.endpoint");
 
 			conf = true;
 		} catch (IOException io) {

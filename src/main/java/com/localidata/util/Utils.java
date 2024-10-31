@@ -1043,9 +1043,9 @@ public class Utils {
 	public static boolean isString(String cell) {
 		boolean resultado = false;
 
-		//String pattern = "(([a-z]|[A-Z]| )+)";
+		String pattern = "(([a-z]|[A-Z]| )+)";
 
-		String pattern = "(?i)([a-z\\s]+)";
+		//String pattern = "(?i)([a-z\\s]+)";
 
 		Pattern r = Pattern.compile(pattern);
 		Matcher m = r.matcher(cell);

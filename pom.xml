@@ -17,6 +17,27 @@
 
         <dependencies>
                 <dependency>
+                        <groupId>io.opentelemetry</groupId>
+                        <artifactId>opentelemetry-api</artifactId>
+                        <version>1.43.0</version>
+                </dependency>
+                <dependency>
+                        <groupId>io.opentelemetry</groupId>
+                        <artifactId>opentelemetry-sdk</artifactId>
+                        <version>1.43.0</version>
+                </dependency>
+                <dependency>
+                        <groupId>io.opentelemetry</groupId>
+                        <artifactId>opentelemetry-exporter-jaeger</artifactId>
+                        <version>1.27.0</version>
+                </dependency>
+                        <dependency>
+                        <groupId>io.opentelemetry</groupId>
+                        <artifactId>opentelemetry-sdk-extension-autoconfigure</artifactId>
+                        <version>1.43.0</version>
+                </dependency>
+
+                <dependency>
                         <groupId>junit</groupId>
                         <artifactId>junit</artifactId>
                         <version>3.8.1</version>
@@ -268,10 +289,20 @@
         </build>
 
         <repositories>
-            <repository>
+            <!-- <repository>
               <id>codelds</id>
               <url>https://code.lds.org/nexus/content/groups/main-repo</url>
-            </repository>
+            </repository> -->
+                <repository>
+                        <id>central</id>
+                        <url>https://repo.maven.apache.org/maven2/</url>
+                        <releases>
+                        <enabled>true</enabled>
+                        </releases>
+                        <snapshots>
+                        <enabled>false</enabled>
+                        </snapshots>
+                </repository>
           </repositories>
 
 </project>

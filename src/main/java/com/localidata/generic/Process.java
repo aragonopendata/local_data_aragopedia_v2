@@ -1,5 +1,10 @@
 package com.localidata.generic;
 
+// import io.opentelemetry.api.GlobalOpenTelemetry;
+// import io.opentelemetry.api.trace.Span;
+// import io.opentelemetry.api.trace.Tracer;
+// import io.opentelemetry.api.trace.SpanKind;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,10 +24,18 @@ import com.localidata.transform.GenerateConfig;
  */
 public class Process {
 
+	//private static final Tracer tracer = GlobalOpenTelemetry.getTracer("com.localidata.generic.Process");
+
 	public static void main(String[] args) {
+
+		//OpenTelemetryConfig.initOpenTelemetry();
 		
 		Logger log = Logger.getLogger(Process.class);
 		PropertyConfigurator.configure("log4j.properties");
+
+		// Span mainSpan = tracer.spanBuilder("ETL Main Process")
+        //         .setSpanKind(SpanKind.SERVER)
+        //         .startSpan();
 		
 		if (args[0].equals("config")) {
 			GenerateConfig.main(args);
@@ -53,6 +66,10 @@ public class Process {
 			log.info("End configTest");
 			
 		} else if (args[0].equals("update")) {
+			// Span updateSpan = tracer.spanBuilder("Update Process")
+            //             .setParent(mainSpan)
+            //             .startSpan();
+
 			PropertyConfigurator.configure("log4j.properties");
 			log.info("Start process");
 			Prop.loadConf();
