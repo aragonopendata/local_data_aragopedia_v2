@@ -13,7 +13,10 @@ public class OpenTelemetryConfig {
 
     private static String jaegerEndpoint = "";
 
-    public static void initOpenTelemetry(String jaegerEndpoint) {
+    public static void initOpenTelemetry() {
+
+        Prop.loadConf();
+        jaegerEndpoint = Prop.jaegerEndpoint;
 
         JaegerGrpcSpanExporter jaegerExporter = JaegerGrpcSpanExporter.builder()
                 .setEndpoint(jaegerEndpoint)
