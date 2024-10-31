@@ -26,15 +26,13 @@ import com.localidata.util.OpenTelemetryConfig;
  */
 public class Process {
 
-	private static final Tracer tracer;
-
-	static {
-		Prop.loadConf();
-		OpenTelemetryConfig.initOpenTelemetry();
-		tracer = GlobalOpenTelemetry.getTracer("com.localidata.generic.Process");
-	}
-
 	public static void main(String[] args) {
+
+		Prop.loadConf(); 
+
+		OpenTelemetryConfig.initOpenTelemetry();
+        Tracer tracer = GlobalOpenTelemetry.getTracer("com.localidata.generic.Process");
+
 
 		Logger log = Logger.getLogger(Process.class);
 		PropertyConfigurator.configure("log4j.properties");
