@@ -64,8 +64,7 @@ public class Prop {
 	public static int defaultTimeOut = 5000;
 	public static int readTimeOut = 30000;
 
-	// public static String jaegerEndpoint = "";
-	
+	public static String jaegerEndpoint = "";
 	
 	public static boolean loadConf() {
 		boolean conf = false;
@@ -130,7 +129,7 @@ public class Prop {
 			defaultTimeOut = Integer.parseInt(prop.getProperty("defaultTimeOut"));
 			readTimeOut = Integer.parseInt(prop.getProperty("readTimeOut"));
 
-			//jaegerEndpoint = prop.getProperty("jaeger.endpoint");
+			jaegerEndpoint = prop.getProperty("jaeger.endpoint");
 
 			conf = true;
 		} catch (IOException io) {

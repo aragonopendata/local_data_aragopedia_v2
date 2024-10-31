@@ -14,6 +14,12 @@ import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.context.Scope;
+
 import com.localidata.bean.ConfigBean;
 import com.localidata.bean.DataBean;
 import com.localidata.bean.SkosBean;
@@ -21,6 +27,7 @@ import com.localidata.generic.Constants;
 import com.localidata.generic.GithubApi;
 import com.localidata.generic.Prop;
 import com.localidata.util.Utils;
+import com.localidata.util.OpenTelemetryConfig;
 
 /**
  * 
@@ -29,6 +36,12 @@ import com.localidata.util.Utils;
 public class GenerateConfig {
 
 	private final static Logger log = Logger.getLogger(GenerateConfig.class);
+	static {
+        OpenTelemetryConfig.initOpenTelemetry();
+    }
+
+	private static final Tracer tracer = GlobalOpenTelemetry.getTracer("com.localidata.extract.GenerateConfig");
+
 	protected String inputDirectoryString = "D:\\trabajo\\gitOpenDataAragon2\\doc\\iaest\\DatosPrueba2";
 	public static String configDirectoryString = "";
 	private String urlsFileString = "";
@@ -50,6 +63,11 @@ public class GenerateConfig {
 
 
 	public void generateNewConfig(List<String> news) {
+		//Span generateCSVSpan = tracer.spanBuilder("Generate config")
+                //.setSpanKind(SpanKind.INTERNAL)
+                //.startSpan();
+		
+		//try (Scope scope = generateCSVSpan.makeCurrent()){
 		log.info("Init generateNewConfig");
 		HashMap<String, ConfigBean> configExtrated = new HashMap<String, ConfigBean>();
 

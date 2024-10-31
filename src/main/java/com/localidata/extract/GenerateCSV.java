@@ -16,24 +16,29 @@ import org.apache.commons.logging.Log;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.context.Scope;
+
 import com.localidata.generic.Constants;
 import com.localidata.generic.Prop;
 import com.localidata.util.Cookies;
 import com.localidata.util.Jdbcconnection;
 import com.localidata.util.Utils;
-
-// import io.opentelemetry.api.GlobalOpenTelemetry;
-// import io.opentelemetry.api.trace.Span;
-// import io.opentelemetry.api.trace.Tracer;
-// import io.opentelemetry.api.trace.SpanKind;
-// import com.localidata.util.OpenTelemetryConfig;
+import com.localidata.util.OpenTelemetryConfig;
 
 /**
  * @author Localidata
  */
 public class GenerateCSV {
 	private final static Logger log = Logger.getLogger(GenerateCSV.class);
-	// private static final Tracer tracer = OpenTelemetryConfig.initOpenTelemetry().getTracer("com.localidata.extract.GenerateCSV");
+	static {
+        OpenTelemetryConfig.initOpenTelemetry();
+    }
+
+	private static final Tracer tracer = GlobalOpenTelemetry.getTracer("com.localidata.extract.GenerateCSV");
 
 	private String urlsFileString = "";
 	private String outputFilesDirectoryString = "";
@@ -45,11 +50,11 @@ public class GenerateCSV {
 
 	public GenerateCSV(String urls, String outputFiles) {
 
-		// Span generateCSVSpan = tracer.spanBuilder("Generate CSV process")
-        //         .setSpanKind(SpanKind.INTERNAL)
-        //         .startSpan();
+		Span generateCSVSpan = tracer.spanBuilder("Generate CSV process")
+                .setSpanKind(SpanKind.INTERNAL)
+                .startSpan();
 
-		try {
+		try (Scope scope = generateCSVSpan.makeCurrent()){
 			urlsFileString = urls;
 			outputFilesDirectoryString = outputFiles;
 			log.info("Nos conectamos a la base de datos para generar los ficheros");
@@ -57,11 +62,11 @@ public class GenerateCSV {
 			log.info("Generando el fichero InformesEstadisticaLocal-URLs.csv");
 			Jdbcconnection.main(null);
 		} catch (Exception e) {
-			// generateCSVSpan.setAttribute("error", true);
-            // generateCSVSpan.setAttribute("error.message", e.getMessage());
+			generateCSVSpan.setAttribute("error", true);
+            generateCSVSpan.setAttribute("error.message", e.getMessage());
 			log.error("Error generando informe bbdd iaest",e);
 		}finally {
-            //generateCSVSpan.end();
+            generateCSVSpan.end();
 			log.info("Fin de la generación del fichero InformesEstadisticaLocal-URLs.csv");
         }
 		
@@ -266,11 +271,11 @@ public class GenerateCSV {
 	}
 
 	private String cleanAndTransform(String content) {
-		// Span cleanAndTransformSpan = tracer.spanBuilder("Clean and transform")
-        //         .setSpanKind(SpanKind.INTERNAL)
-        //         .startSpan();
+		Span cleanAndTransformSpan = tracer.spanBuilder("Clean and transform")
+                .setSpanKind(SpanKind.INTERNAL)
+            	.startSpan();
 
-		//try {
+		try(Scope scope = cleanAndTransformSpan.makeCurrent()) {
 			int separador = 0;
 			String cadena_reemplazar = (char)separador + "";
 			content = content.replace(cadena_reemplazar, ""); //REMPLAZAMOS EL CARACTER NULO (EN OCASIONES VIENE UN CARACTER NULO ENTRE CADA CARACTER DEL CONTENIDO)
@@ -279,24 +284,25 @@ public class GenerateCSV {
 			content = content.replace(new String(Character.toChars(0)), "");
 			content = content.replace("ÿþ", "");
 			return content;
-		//} catch (Exception e) {
-			//log.error(e);
-			// cleanAndTransformSpan.setAttribute("error", true);
-            // cleanAndTransformSpan.setAttribute("error.message", e.getMessage());
-		//}
-		// finally {
-        //     cleanAndTransformSpan.end();
-        // }
+		} catch (Exception e) {
+			log.error(e);
+			cleanAndTransformSpan.setAttribute("error", true);
+            cleanAndTransformSpan.setAttribute("error.message", e.getMessage());
+			//return "";
+			throw e;
+		}finally {
+        	cleanAndTransformSpan.end();
+        }
 
 	}
 
 	public void generateHashCode(List<String> result, List<String> list) {
 
-		// Span generateHashCodeSpan = tracer.spanBuilder("Generate hashcode")
-        //         .setSpanKind(SpanKind.INTERNAL)
-        //         .startSpan();
+		Span generateHashCodeSpan = tracer.spanBuilder("Generate hashcode")
+            .setSpanKind(SpanKind.INTERNAL)
+            .startSpan();
 		
-		try {
+		try(Scope scope = generateHashCodeSpan.makeCurrent()) {
 
 			File fileCSV = new File(String.valueOf(Prop.fileHashCSV) + "." + "csv");
 			File fileXlsx = new File(String.valueOf(Prop.fileHashCSV) + "." + "xlsx");
@@ -324,13 +330,12 @@ public class GenerateCSV {
 			Utils.csvToXLSX(fileCSV, fileXlsx);
 			log.info("Hashcode generado correctamente");
 		} catch (Exception e) {
-			//generateHashCodeSpan.setAttribute("error", true);
-            //generateHashCodeSpan.setAttribute("error.message", e.getMessage());
+			generateHashCodeSpan.setAttribute("error", true);
+            generateHashCodeSpan.setAttribute("error.message", e.getMessage());
 			log.error("Error generando fichero hashcode", e);
-		}
-		// }finally {
-        //     generateHashCodeSpan.end();
-        // }
+		}finally {
+            generateHashCodeSpan.end();
+        }
 	}
 	
 	public void generateHashCodeFromBI() {
