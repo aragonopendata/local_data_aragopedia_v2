@@ -29,6 +29,7 @@ public class Process {
 	private static final Tracer tracer;
 
 	static {
+		Prop.loadConf();
 		OpenTelemetryConfig.initOpenTelemetry();
 		tracer = GlobalOpenTelemetry.getTracer("com.localidata.generic.Process");
 	}
@@ -75,7 +76,7 @@ public class Process {
 
 				PropertyConfigurator.configure("log4j.properties");
 				log.info("Start process");
-				Prop.loadConf();
+				// Prop.loadConf();
 				GenerateCSV csv = new GenerateCSV(args[1], args[2]);
 				csv.extractFiles();
 
@@ -105,7 +106,7 @@ public class Process {
 					log.info("No hay cambios");
 				}
 				log.info("end update");
-				
+
 			} finally {
 				updateSpan.end();
 			}
