@@ -12,25 +12,42 @@ import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 import java.time.Duration;
 
 public class OpenTelemetryConfig {
-    private static final OpenTelemetry openTelemetry;
+    private static OpenTelemetry openTelemetry;
+    private static Tracer tracer;
 
-    static {
-        String jaegerEndpoint = Prop.jaegerEndpoint;
+    public static void initialize() {
+        if (openTelemetry == null) {
 
-        JaegerGrpcSpanExporter jaegerExporter = JaegerGrpcSpanExporter.builder()
-                .setEndpoint(jaegerEndpoint)
-                .build();
+            if (!Prop.loadConf()) {
+                throw new RuntimeException("Failed to load configuration properties");
+            }
 
-        SdkTracerProvider tracerProvider = SdkTracerProvider.builder()
-                .addSpanProcessor(BatchSpanProcessor.builder(jaegerExporter).build())
-                .build();
+            String jaegerEndpoint = Prop.jaegerEndpoint;
 
-        openTelemetry = OpenTelemetrySdk.builder()
-                .setTracerProvider(tracerProvider)
-                .buildAndRegisterGlobal();
+            if (jaegerEndpoint == null || !jaegerEndpoint.startsWith("http://") && !jaegerEndpoint.startsWith("https://")) {
+                throw new IllegalArgumentException("Invalid Jaeger endpoint: " + jaegerEndpoint);
+            }
+
+            JaegerGrpcSpanExporter jaegerExporter = JaegerGrpcSpanExporter.builder()
+                    .setEndpoint(jaegerEndpoint)
+                    .build();
+
+            SdkTracerProvider tracerProvider = SdkTracerProvider.builder()
+                    .addSpanProcessor(BatchSpanProcessor.builder(jaegerExporter).build())
+                    .build();
+
+            openTelemetry = OpenTelemetrySdk.builder()
+                    .setTracerProvider(tracerProvider)
+                    .buildAndRegisterGlobal();
+
+            tracer = openTelemetry.getTracer("ProcessTracer");
+        }
     }
 
     public static Tracer getTracer() {
-        return GlobalOpenTelemetry.getTracer("ProcessTracer");
+        if (tracer == null) {
+            throw new IllegalStateException("OpenTelemetryConfig has not been initialized. Call initialize() first.");
+        }
+        return tracer;
     }
 }

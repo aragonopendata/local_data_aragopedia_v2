@@ -70,6 +70,7 @@ public class Process {
 		} else if (args[0].equals("update")) {
 
 			Prop.loadConf();
+			OpenTelemetryConfig.initialize();
 
 			Span updateSpan = tracer.spanBuilder("Update Process")
 						.setSpanKind(SpanKind.SERVER)
