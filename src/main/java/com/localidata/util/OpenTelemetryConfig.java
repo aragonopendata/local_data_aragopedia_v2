@@ -3,35 +3,34 @@ package com.localidata.util;
 import com.localidata.generic.Prop;
 
 import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
-import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 import io.opentelemetry.exporter.jaeger.JaegerGrpcSpanExporter;
+import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 import java.time.Duration;
 
 public class OpenTelemetryConfig {
+    private static final OpenTelemetry openTelemetry;
 
-
-    public static void initOpenTelemetry(String jaegerEndpoint) {
+    static {
+        String jaegerEndpoint = Prop.jaegerEndpoint;
 
         JaegerGrpcSpanExporter jaegerExporter = JaegerGrpcSpanExporter.builder()
                 .setEndpoint(jaegerEndpoint)
                 .build();
 
-        BatchSpanProcessor spanProcessor = BatchSpanProcessor.builder(jaegerExporter)
-                .setScheduleDelay(Duration.ofMillis(100))
-                .build();
-
         SdkTracerProvider tracerProvider = SdkTracerProvider.builder()
-                .addSpanProcessor(spanProcessor)
+                .addSpanProcessor(BatchSpanProcessor.builder(jaegerExporter).build())
                 .build();
 
-        OpenTelemetrySdk openTelemetry = OpenTelemetrySdk.builder()
+        openTelemetry = OpenTelemetrySdk.builder()
                 .setTracerProvider(tracerProvider)
-                .build();
+                .buildAndRegisterGlobal();
+    }
 
-        GlobalOpenTelemetry.set(openTelemetry);
-
-        //return openTelemetry;
+    public static Tracer getTracer() {
+        return GlobalOpenTelemetry.getTracer("ProcessTracer");
     }
 }

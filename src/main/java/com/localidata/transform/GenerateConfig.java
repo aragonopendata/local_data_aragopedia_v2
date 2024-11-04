@@ -36,11 +36,7 @@ import com.localidata.util.OpenTelemetryConfig;
 public class GenerateConfig {
 
 	private final static Logger log = Logger.getLogger(GenerateConfig.class);
-	static {
-        OpenTelemetryConfig.initOpenTelemetry(Prop.jaegerEndpoint);
-    }
-
-	private static final Tracer tracer = GlobalOpenTelemetry.getTracer("com.localidata.extract.GenerateConfig");
+	
 
 	protected String inputDirectoryString = "D:\\trabajo\\gitOpenDataAragon2\\doc\\iaest\\DatosPrueba2";
 	public static String configDirectoryString = "";

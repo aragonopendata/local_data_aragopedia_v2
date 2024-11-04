@@ -34,11 +34,7 @@ import com.localidata.util.OpenTelemetryConfig;
  */
 public class GenerateCSV {
 	private final static Logger log = Logger.getLogger(GenerateCSV.class);
-	static {
-        OpenTelemetryConfig.initOpenTelemetry(Prop.jaegerEndpoint);
-    }
-
-	private static final Tracer tracer = GlobalOpenTelemetry.getTracer("com.localidata.extract.GenerateCSV");
+	private static final Tracer tracer = OpenTelemetryConfig.getTracer();
 
 	private String urlsFileString = "";
 	private String outputFilesDirectoryString = "";

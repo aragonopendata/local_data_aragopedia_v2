@@ -26,12 +26,14 @@ import com.localidata.util.OpenTelemetryConfig;
  */
 public class Process {
 
+	private static final Tracer tracer = OpenTelemetryConfig.getTracer();
+
 	public static void main(String[] args) {
 
-		Prop.loadConf(); 
+		// Prop.loadConf(); 
 
-		OpenTelemetryConfig.initOpenTelemetry(Prop.jaegerEndpoint);
-        Tracer tracer = GlobalOpenTelemetry.getTracer("com.localidata.generic.Process");
+		// OpenTelemetryConfig.initOpenTelemetry(Prop.jaegerEndpoint);
+        // Tracer tracer = GlobalOpenTelemetry.getTracer("com.localidata.generic.Process");
 
 
 		Logger log = Logger.getLogger(Process.class);
@@ -66,6 +68,9 @@ public class Process {
 			log.info("End configTest");
 			
 		} else if (args[0].equals("update")) {
+
+			Prop.loadConf();
+
 			Span updateSpan = tracer.spanBuilder("Update Process")
 						.setSpanKind(SpanKind.SERVER)
 						.startSpan();

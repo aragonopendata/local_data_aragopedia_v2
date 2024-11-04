@@ -129,7 +129,7 @@ public class Prop {
 			defaultTimeOut = Integer.parseInt(prop.getProperty("defaultTimeOut"));
 			readTimeOut = Integer.parseInt(prop.getProperty("readTimeOut"));
 
-			jaegerEndpoint = prop.getProperty("jaeger.endpoint");
+			jaegerEndpoint = prop.getProperty("jaegerEndpoint");
 
 			conf = true;
 		} catch (IOException io) {
