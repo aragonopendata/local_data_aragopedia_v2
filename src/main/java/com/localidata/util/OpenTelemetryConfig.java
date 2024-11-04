@@ -8,7 +8,12 @@ import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.exporter.jaeger.JaegerGrpcSpanExporter;
+import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
+import io.opentelemetry.sdk.resources.Resource;
+import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
+import io.opentelemetry.api.common.Attributes;
+
 import java.time.Duration;
 
 public class OpenTelemetryConfig {
@@ -28,12 +33,18 @@ public class OpenTelemetryConfig {
                 throw new IllegalArgumentException("Invalid Jaeger endpoint: " + jaegerEndpoint);
             }
 
-            JaegerGrpcSpanExporter jaegerExporter = JaegerGrpcSpanExporter.builder()
+            Resource resource = Resource.create(
+                    Attributes.of(ResourceAttributes.SERVICE_NAME, "DatacubeService")
+            );
+
+            OtlpGrpcSpanExporter otlpExporter = OtlpGrpcSpanExporter.builder()
                     .setEndpoint(jaegerEndpoint)
+                    .setTimeout(java.time.Duration.ofSeconds(30))
                     .build();
 
             SdkTracerProvider tracerProvider = SdkTracerProvider.builder()
-                    .addSpanProcessor(BatchSpanProcessor.builder(jaegerExporter).build())
+                    .addSpanProcessor(BatchSpanProcessor.builder(otlpExporter).build())
+                    .setResource(resource)
                     .build();
 
             openTelemetry = OpenTelemetrySdk.builder()

@@ -26,7 +26,7 @@ import com.localidata.util.OpenTelemetryConfig;
  */
 public class Process {
 
-	private static final Tracer tracer = OpenTelemetryConfig.getTracer();
+	//private static final Tracer tracer = OpenTelemetryConfig.getTracer();
 
 	public static void main(String[] args) {
 
@@ -72,7 +72,7 @@ public class Process {
 			Prop.loadConf();
 			OpenTelemetryConfig.initialize();
 
-			Span updateSpan = tracer.spanBuilder("Update Process")
+			Span updateSpan = OpenTelemetryConfig.getTracer().spanBuilder("Update Process")
 						.setSpanKind(SpanKind.SERVER)
 						.startSpan();
 
