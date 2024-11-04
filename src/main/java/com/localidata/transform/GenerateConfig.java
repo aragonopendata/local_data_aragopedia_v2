@@ -37,7 +37,7 @@ public class GenerateConfig {
 
 	private final static Logger log = Logger.getLogger(GenerateConfig.class);
 	static {
-        OpenTelemetryConfig.initOpenTelemetry();
+        OpenTelemetryConfig.initOpenTelemetry(Prop.jaegerEndpoint);
     }
 
 	private static final Tracer tracer = GlobalOpenTelemetry.getTracer("com.localidata.extract.GenerateConfig");

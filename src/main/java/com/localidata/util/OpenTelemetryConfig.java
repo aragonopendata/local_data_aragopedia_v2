@@ -12,12 +12,10 @@ import java.time.Duration;
 public class OpenTelemetryConfig {
 
 
-    public static void initOpenTelemetry() {
-
-        Prop.loadConf();
+    public static void initOpenTelemetry(String jaegerEndpoint) {
 
         JaegerGrpcSpanExporter jaegerExporter = JaegerGrpcSpanExporter.builder()
-                .setEndpoint(Prop.jaegerEndpoint)
+                .setEndpoint(jaegerEndpoint)
                 .build();
 
         BatchSpanProcessor spanProcessor = BatchSpanProcessor.builder(jaegerExporter)
