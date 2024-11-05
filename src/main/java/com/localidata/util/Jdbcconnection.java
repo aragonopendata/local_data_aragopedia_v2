@@ -127,14 +127,16 @@ public class Jdbcconnection {
                         
 
                         for (Valor valor : valores) {
-                                Span loopQuerySpan = tracer.spanBuilder("Loop query")
-                                        .setSpanKind(SpanKind.INTERNAL)
-                                        .startSpan();
+                                
+                                //Excluimos los informes de la carpeta /06
+                                if(valor.getDirweb() != null && !valor.getDirweb().substring(lenS,lenS+2).equals("06")){
 
-                                try (Scope scopeLoopQuery = loopQuerySpan.makeCurrent()){
-                        
-                                        //Excluimos los informes de la carpeta /06
-                                        if(valor.getDirweb() != null && !valor.getDirweb().substring(lenS,lenS+2).equals("06")){
+                                        Span loopQuerySpan = tracer.spanBuilder("Loop query ")
+                                                .setSpanKind(SpanKind.INTERNAL)
+                                                .startSpan();
+
+                                        try (Scope scopeLoopQuery = loopQuerySpan.makeCurrent()){
+
                                                 writer.append("\"" + valor.getDescripcion() + "\"");
                                                 writer.append(",");
                                                 writer.append("\"" + valor.getDescripcion() + " # ");
@@ -244,14 +246,14 @@ public class Jdbcconnection {
                                                 loopQuerySpan.setAttribute(AttributeKey.stringKey("codigoEstadistica"), codigoEstadistica);
                                                 loopQuerySpan.setAttribute(AttributeKey.stringKey("dirWeb"), valor.getDirweb());
                                                 loopQuerySpan.setAttribute(AttributeKey.stringKey("operacion"), valor.getOperacion());
-
+                                        }catch (Exception e) {
+                                                loopQuerySpan.recordException(e);
+                                                throw e;
+                                        } finally {
+                                                loopQuerySpan.end(); 
                                         }
-                                }catch (Exception e) {
-                                        loopQuerySpan.recordException(e);
-                                        throw e;
-                                } finally {
-                                        loopQuerySpan.end(); 
                                 }
+                                
                         }
                         writer.close();
                         writer2.close();
