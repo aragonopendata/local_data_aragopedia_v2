@@ -16,18 +16,19 @@ import org.apache.commons.logging.Log;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
-import io.opentelemetry.api.GlobalOpenTelemetry;
-import io.opentelemetry.api.trace.Span;
-import io.opentelemetry.api.trace.Tracer;
-import io.opentelemetry.api.trace.SpanKind;
-import io.opentelemetry.context.Scope;
-
 import com.localidata.generic.Constants;
 import com.localidata.generic.Prop;
 import com.localidata.util.Cookies;
 import com.localidata.util.Jdbcconnection;
 import com.localidata.util.Utils;
 import com.localidata.util.OpenTelemetryConfig;
+
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Scope;
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.common.AttributeKey;
 
 /**
  * @author Localidata
@@ -54,8 +55,11 @@ public class GenerateCSV {
 			urlsFileString = urls;
 			outputFilesDirectoryString = outputFiles;
 			log.info("Nos conectamos a la base de datos para generar los ficheros");
-
 			log.info("Generando el fichero InformesEstadisticaLocal-URLs.csv");
+
+			generateCSVSpan.setAttribute(AttributeKey.stringKey("urlsFileString"), urlsFileString);
+			generateCSVSpan.setAttribute(AttributeKey.stringKey("outputFilesDirectoryString"), outputFilesDirectoryString);
+
 			Jdbcconnection.main(null);
 		} catch (Exception e) {
 			generateCSVSpan.setAttribute("error", true);

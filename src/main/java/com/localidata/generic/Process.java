@@ -26,15 +26,8 @@ import com.localidata.util.OpenTelemetryConfig;
  */
 public class Process {
 
-	//private static final Tracer tracer = OpenTelemetryConfig.getTracer();
 
 	public static void main(String[] args) {
-
-		// Prop.loadConf(); 
-
-		// OpenTelemetryConfig.initOpenTelemetry(Prop.jaegerEndpoint);
-        // Tracer tracer = GlobalOpenTelemetry.getTracer("com.localidata.generic.Process");
-
 
 		Logger log = Logger.getLogger(Process.class);
 		PropertyConfigurator.configure("log4j.properties");
