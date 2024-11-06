@@ -143,12 +143,13 @@ public class GenerateCSV {
 
 			for (int h = 1; h < csvLines.size(); h++) {
 
-				Span downloadFilesSpan = tracer.spanBuilder("Download files in extractFiles")
-					.setSpanKind(SpanKind.INTERNAL)
-					.startSpan();
+				// Span downloadFilesSpan = tracer.spanBuilder("Download files in extractFiles")
+				// 	.setSpanKind(SpanKind.INTERNAL)
+				// 	.startSpan();
 				
 				boolean procesar = true;
-				try (Scope scopeDownloadFilesSpan = downloadFilesSpan.makeCurrent()){		
+				try{		
+				// try (Scope scopeDownloadFilesSpan = downloadFilesSpan.makeCurrent()){		
 					cookies = new Cookies();
 					String line = csvLines.get(h);
 					valores = line.split(",");
@@ -166,13 +167,14 @@ public class GenerateCSV {
 						if(numBytesOcupa > Prop.limitCubeSize) {
 							procesar = false;
 							log.info("Se ha superado el limite establecido por parametro para procesar el cubo " + valores[0] + ":" + numBytesOcupa + " bytes");
-							downloadFilesSpan.setAttribute(AttributeKey.stringKey("cubo"), valores[0]);
-							downloadFilesSpan.setAttribute(AttributeKey.booleanKey("download"), false);
+							// downloadFilesSpan.setAttribute(AttributeKey.stringKey("cubo"), valores[0]);
+							// downloadFilesSpan.setAttribute(AttributeKey.booleanKey("download"), false);
 							log.error("Error al descargar " + valores[1]);
-						}else{
-							downloadFilesSpan.setAttribute(AttributeKey.stringKey("cubo"), valores[0]);
-							downloadFilesSpan.setAttribute(AttributeKey.booleanKey("download"), true);
 						}
+						// }else{
+						// 	downloadFilesSpan.setAttribute(AttributeKey.stringKey("cubo"), valores[0]);
+						// 	downloadFilesSpan.setAttribute(AttributeKey.booleanKey("download"), true);
+						// }
 					}
 					
 					if (Utils.v(content) && procesar) {
@@ -181,7 +183,7 @@ public class GenerateCSV {
 						String hash = Utils.generateHash(content);
 						processContentFile(all, numErrorFiles, errorFiles, valores, content, hash);
 
-						downloadFilesSpan.setAttribute(AttributeKey.stringKey("hash"), hash);
+						// downloadFilesSpan.setAttribute(AttributeKey.stringKey("hash"), hash);
 					}
 
 				}catch (Exception e) {
@@ -189,12 +191,13 @@ public class GenerateCSV {
 					errorFiles.put(valores, content);
 					String valor = valores.length>0 ? valores[1] : "";
 					log.error("Error al descargar " + valor, e);
-					downloadFilesSpan.setAttribute("error", true);
-					downloadFilesSpan.setAttribute("error.message", e.getMessage());
+					// downloadFilesSpan.setAttribute("error", true);
+					// downloadFilesSpan.setAttribute("error.message", e.getMessage());
 					
-				}finally {
-					downloadFilesSpan.end();
 				}
+				// finally {
+				// 	downloadFilesSpan.end();
+				// }
 				
 			}
 			
@@ -204,30 +207,31 @@ public class GenerateCSV {
 			Iterator<String[]> iterator = numErrorFiles.keySet().iterator();
 			while (j < totalElements) {
 
-				Span retryDownloadFilesSpan = tracer.spanBuilder("Retry download files in extractFiles")
-					.setSpanKind(SpanKind.INTERNAL)
-					.startSpan();
+				// Span retryDownloadFilesSpan = tracer.spanBuilder("Retry download files in extractFiles")
+				// 	.setSpanKind(SpanKind.INTERNAL)
+				// 	.startSpan();
 
-				try (Scope scopeRetryDownloadFilesSpan = retryDownloadFilesSpan.makeCurrent()){
+				try{
+				// try (Scope scopeRetryDownloadFilesSpan = retryDownloadFilesSpan.makeCurrent()){
 
 					valores = iterator.next();
 					Integer numErrors = numErrorFiles.get(valores);
 					boolean sucess = false;
 
-					retryDownloadFilesSpan.setAttribute("csv_file_name", valores[1]);
-        			retryDownloadFilesSpan.setAttribute("current_attempts", numErrors);
+					// retryDownloadFilesSpan.setAttribute("csv_file_name", valores[1]);
+        			// retryDownloadFilesSpan.setAttribute("current_attempts", numErrors);
 
 					while (numErrors < 5 && numErrors != -1 && sucess ) {
 						log.info("Intento "+numErrors+" del csv "+valores[0]);
-						retryDownloadFilesSpan.addEvent("Attempting download", Attributes.of(
-							AttributeKey.longKey("attempt_number"), numErrors.longValue(),
-							AttributeKey.stringKey("csv_file"), valores[0]
-						));
+						// retryDownloadFilesSpan.addEvent("Attempting download", Attributes.of(
+						// 	AttributeKey.longKey("attempt_number"), numErrors.longValue(),
+						// 	AttributeKey.stringKey("csv_file"), valores[0]
+						// ));
 						content = Utils.processURLGet(Prop.urlBiAragon + valores[0] + "&Action=Download&Options=df" , "", headers, cookies, "ISO-8859-1");
 						if (Utils.v(content)) {
 							content = cleanAndTransform(content);
 							if (!content.contains(Constants.errorDoctypeHtml1) && !content.contains(Constants.errorHtml) && !content.contains(Constants.errorDoctypeHtml2) && !content.contains(Constants.errorDiv) && !content.contains(Constants.errorNingunaFila)) {
-								retryDownloadFilesSpan.addEvent("File downloaded successfully");
+								// retryDownloadFilesSpan.addEvent("File downloaded successfully");
 								Utils.stringToFile(content, new File(outputFilesDirectoryString + File.separator + valores[1] + ".csv"));
 								String hash = Utils.generateHash(content);
 								processContentFile(all, numErrorFiles, errorFiles, valores, content, hash);
@@ -235,24 +239,24 @@ public class GenerateCSV {
 								errorFiles.remove(valores);
 								sucess=true;
 
-								retryDownloadFilesSpan.setAttribute("download_status", "success");
-                    			retryDownloadFilesSpan.setAttribute("file_hash", hash);
+								// retryDownloadFilesSpan.setAttribute("download_status", "success");
+                    			// retryDownloadFilesSpan.setAttribute("file_hash", hash);
 							} else if (!content.contains(Constants.errorExcedidoN) && !content.contains(Constants.errorRutaNoEncontrada) && !content.contains(Constants.errorNingunaFila)) {
 								log.error("Informe " + valores[1] + " imposible de descargar intento " + (numErrors + 1));
 								numErrorFiles.put(valores, new Integer(-1));
 
-								retryDownloadFilesSpan.setAttribute("download_status", "failed");
-								retryDownloadFilesSpan.addEvent("File download failed", Attributes.of(
-									AttributeKey.stringKey("reason"), "Invalid content detected"
-								));
+								// retryDownloadFilesSpan.setAttribute("download_status", "failed");
+								// retryDownloadFilesSpan.addEvent("File download failed", Attributes.of(
+								// 	AttributeKey.stringKey("reason"), "Invalid content detected"
+								// ));
 							} else {
 								log.error("Informe " + valores[1] + " imposible de descargar intento " + (numErrors + 1));
 								numErrorFiles.put(valores, ++numErrors);
 
-								retryDownloadFilesSpan.setAttribute("download_status", "retrying");
-								retryDownloadFilesSpan.addEvent("Retrying download", Attributes.of(
-									AttributeKey.longKey("next_attempt"), numErrors.longValue()
-								));
+								// retryDownloadFilesSpan.setAttribute("download_status", "retrying");
+								// retryDownloadFilesSpan.addEvent("Retrying download", Attributes.of(
+								// 	AttributeKey.longKey("next_attempt"), numErrors.longValue()
+								// ));
 							}
 						}
 						Thread.sleep(1000);
@@ -266,9 +270,10 @@ public class GenerateCSV {
 					throw e; // Lanzar nuevamente la InterruptedException
 				} catch (Exception e2) {
 					log.error("Error al descargar " + valores[1], e2);
-				}finally {
-					retryDownloadFilesSpan.end();
 				}
+				// finally {
+				// 	retryDownloadFilesSpan.end();
+				// }
 			}
 
 			for (String[] val : errorFiles.keySet()) {

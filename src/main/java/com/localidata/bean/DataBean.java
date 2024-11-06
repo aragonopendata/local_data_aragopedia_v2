@@ -8,7 +8,15 @@ import org.apache.log4j.Logger;
 
 import com.localidata.generic.Constants;
 import com.localidata.util.Utils;
+import com.localidata.util.OpenTelemetryConfig;
 
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Scope;
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.common.Attributes;
 /**
  * 
  * @author Localidata
@@ -17,6 +25,8 @@ import com.localidata.util.Utils;
 public class DataBean {
 
 	private final static Logger log = Logger.getLogger(DataBean.class);
+	private static final Tracer tracer = OpenTelemetryConfig.getTracer();
+	
 	private String name;
 	private String nameNormalized;
 	private String normalizacion;
@@ -254,46 +264,72 @@ public class DataBean {
 
 	@SuppressWarnings("unchecked")
 	public HashMap<String, SkosBean> mergeSkos(DataBean data) {
-		log.debug("init mergeSkos " + data);
-		HashMap<String, SkosBean> mapSkos = null;
-		mapSkos = (HashMap<String, SkosBean>) this.mapSkos.clone();
-		if (this.equals(data)) {
-			return null;
-		}
-		for (Iterator<SkosBean> itMapSkosSource = this.mapSkos.values()
-				.iterator(); itMapSkosSource.hasNext();) {
-			SkosBean skosSource = itMapSkosSource.next();
-			boolean continua = false;
 
-			for (Iterator<SkosBean> itMapSkosTarget = data.getMapSkos()
-					.values().iterator(); itMapSkosTarget.hasNext();) {
-				SkosBean skosTarget = itMapSkosTarget.next();
-				if (!this.mapSkos.values().contains(skosTarget)) {
-					if (skosTarget.getId().equals(skosSource.getId())) {
-						continua = true;
-						continue;
-					} else if (skosTarget.getId()
-							.startsWith(skosSource.getId())) {
-						skosTarget.setParent(skosSource);
-						skosSource.getSons().add(skosTarget);
-						mapSkos.put(skosTarget.getId(), skosTarget);
-						continua = true;
-						continue;
+		Span mergeSkosSpan = tracer.spanBuilder("Merge SKOS in DataBean")
+			.setSpanKind(SpanKind.INTERNAL)
+			.startSpan();
+
+		try (Scope scope = mergeSkosSpan.makeCurrent()) {
+
+			mergeSkosSpan.setAttribute("data.name", data.getName());
+			mergeSkosSpan.setAttribute("mapSkos.size", this.mapSkos.size());
+
+			log.debug("init mergeSkos " + data);
+			HashMap<String, SkosBean> mapSkos = null;
+			mapSkos = (HashMap<String, SkosBean>) this.mapSkos.clone();
+			if (this.equals(data)) {
+				mergeSkosSpan.addEvent("Data is identical to this instance, returning null");
+				return null;
+			}
+			for (Iterator<SkosBean> itMapSkosSource = this.mapSkos.values()
+					.iterator(); itMapSkosSource.hasNext();) {
+				SkosBean skosSource = itMapSkosSource.next();
+				boolean continua = false;
+
+				for (Iterator<SkosBean> itMapSkosTarget = data.getMapSkos()
+						.values().iterator(); itMapSkosTarget.hasNext();) {
+					SkosBean skosTarget = itMapSkosTarget.next();
+					if (!this.mapSkos.values().contains(skosTarget)) {
+						if (skosTarget.getId().equals(skosSource.getId())) {
+							continua = true;
+							mergeSkosSpan.addEvent("Matching SKOS ID found", Attributes.of(AttributeKey.stringKey("skos_id"), skosTarget.getId()));
+							continue;
+						} else if (skosTarget.getId()
+								.startsWith(skosSource.getId())) {
+							skosTarget.setParent(skosSource);
+							skosSource.getSons().add(skosTarget);
+							mapSkos.put(skosTarget.getId(), skosTarget);
+							continua = true;
+							mergeSkosSpan.addEvent("Hierarchy updated for SKOS", Attributes.of(AttributeKey.stringKey("parent_id"), skosSource.getId(), AttributeKey.stringKey("child_id"), skosTarget.getId()));
+							continue;
+						}
 					}
 				}
+				if (!continua){
+					mergeSkosSpan.addEvent("No match found for SKOS entry, returning null");
+					return null;
+				}
 			}
-			if (!continua)
-				return null;
-		}
-		for (Iterator<SkosBean> itMapSkosSource = mapSkos.values()
-				.iterator(); itMapSkosSource.hasNext();) {
-			SkosBean skosSource = itMapSkosSource.next();
-			if (skosSource.getURI() != null && getNameNormalized() != null && getKosNameNormalized() != null) {
-				skosSource.setURI(skosSource.getURI().replace(getNameNormalized(), getKosNameNormalized()));
-				skosSource.setURI(skosSource.getURI().replace(data.getNameNormalized(), getKosNameNormalized()));
+			for (Iterator<SkosBean> itMapSkosSource = mapSkos.values()
+					.iterator(); itMapSkosSource.hasNext();) {
+				SkosBean skosSource = itMapSkosSource.next();
+				if (skosSource.getURI() != null && getNameNormalized() != null && getKosNameNormalized() != null) {
+					skosSource.setURI(skosSource.getURI().replace(getNameNormalized(), getKosNameNormalized()));
+					skosSource.setURI(skosSource.getURI().replace(data.getNameNormalized(), getKosNameNormalized()));
+					mergeSkosSpan.addEvent("URI updated for SKOS entry", Attributes.of(AttributeKey.stringKey("skos_id"), skosSource.getId(), AttributeKey.stringKey("updated_URI"), skosSource.getURI()));
+				}
 			}
+			log.debug("end mergeSkos " + data);
+			mergeSkosSpan.setAttribute("mapSkos.final_size", mapSkos.size());
+			return mapSkos;
+		}catch (Exception e) {
+			mergeSkosSpan.recordException(e);
+			mergeSkosSpan.setAttribute("error", true);
+			log.error("Error in mergeSkos for data: " + data, e);
+			return null;
+
+		} finally {
+			mergeSkosSpan.end();
 		}
-		log.debug("end mergeSkos " + data);
-		return mapSkos;
 	}
 }

@@ -11,7 +11,15 @@ import org.apache.log4j.Logger;
 import com.localidata.generic.Prop;
 import com.localidata.transform.GenerateConfig;
 import com.localidata.util.Utils;
+import com.localidata.util.OpenTelemetryConfig;
 
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Scope;
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.common.Attributes;
 /**
  * 
  * @author Localidata
@@ -20,6 +28,8 @@ import com.localidata.util.Utils;
 public class ConfigBean {
 
 	private final static Logger log = Logger.getLogger(ConfigBean.class);
+	private static final Tracer tracer = OpenTelemetryConfig.getTracer();
+	
 	private String nameFile;
 	private String id;
 	private ArrayList<String> letters = new ArrayList<String>();
@@ -102,98 +112,122 @@ public class ConfigBean {
 	}
 
 	public String toCSV() {
-		String csvSepartor = ",";
-		String fieldSeparator = "\"";
-		String content = "";
-		DataBean[] dataArray = new DataBean[getMapData().keySet().size()];
-		int cont = 0;
-		for (String key : getMapData().keySet()) {
-			DataBean data = getMapData().get(key);
-			dataArray[cont++] = data;
-		}
-		byte b;
-		int i;
-		DataBean[] arrayOfDataBean1;
-		for (i = (arrayOfDataBean1 = dataArray).length, b = 0; b < i; ) {
-			DataBean dataBean = arrayOfDataBean1[b];
-			content = String.valueOf(content) + fieldSeparator + dataBean.getName() + fieldSeparator + csvSepartor;
-			b++;
-		}
 
-		for (DataBean dataBean : this.listDataConstant)
-			content = String.valueOf(content) + fieldSeparator + dataBean.getName() + fieldSeparator + csvSepartor;
-		
-		content = String.valueOf(content.substring(0, content.length() - 1)) + System.getProperty("line.separator");
-		
-		for (i = (arrayOfDataBean1 = dataArray).length, b = 0; b < i; ) {
-			DataBean dataBean = arrayOfDataBean1[b];
-			content = String.valueOf(content) + fieldSeparator + dataBean.getNameNormalized() + fieldSeparator + csvSepartor;
-			b++;
-		}
+		Span toCsvSpan = tracer.spanBuilder("toCsv in ConfigBean")
+                .setSpanKind(SpanKind.INTERNAL)
+                .startSpan();
 
-		for (DataBean dataBean : this.listDataConstant)
-			content = String.valueOf(content) + fieldSeparator + dataBean.getNameNormalized() + fieldSeparator + csvSepartor; 
-		
-		content = String.valueOf(content.substring(0, content.length() - 1)) + System.getProperty("line.separator");
+		try (Scope scope = toCsvSpan.makeCurrent()) {
 
-		for (i = (arrayOfDataBean1 = dataArray).length, b = 0; b < i; ) {
-			DataBean dataBean = arrayOfDataBean1[b];
-			content = String.valueOf(content) + fieldSeparator + dataBean.getNormalizacion() + fieldSeparator + csvSepartor;
-			b++;
-		}
-		
-		for (DataBean dataBean : this.listDataConstant)
-			content = String.valueOf(content) + fieldSeparator + dataBean.getNormalizacion() + fieldSeparator + csvSepartor; 
-		
-		content = String.valueOf(content.substring(0, content.length() - 1)) + System.getProperty("line.separator");
-		
-		for (i = (arrayOfDataBean1 = dataArray).length, b = 0; b < i; ) {
-			DataBean dataBean = arrayOfDataBean1[b];
-			content = String.valueOf(content) + fieldSeparator + dataBean.getDimensionMesureEntry() + fieldSeparator + csvSepartor;
-			b++;
-		}
+			String csvSepartor = ",";
+			String fieldSeparator = "\"";
+			String content = "";
 
-		for (DataBean dataBean : this.listDataConstant)
-			content = String.valueOf(content) + fieldSeparator + dataBean.getDimensionMesureEntry() + fieldSeparator + csvSepartor; 
-		
-		content = String.valueOf(content.substring(0, content.length() - 1)) + System.getProperty("line.separator");
 
-		for (i = (arrayOfDataBean1 = dataArray).length, b = 0; b < i; ) {
-			DataBean dataBean = arrayOfDataBean1[b];
-			content = String.valueOf(content) + fieldSeparator + dataBean.getType() + fieldSeparator + csvSepartor;
-			b++;
-		}
-		
-		for (DataBean dataBean : this.listDataConstant)
-			content = String.valueOf(content) + fieldSeparator + dataBean.getType() + fieldSeparator + csvSepartor; 
-		
-		content = String.valueOf(content.substring(0, content.length() - 1)) + System.getProperty("line.separator");
-
-		for (i = (arrayOfDataBean1 = dataArray).length, b = 0; b < i; ) {
-			DataBean dataBean = arrayOfDataBean1[b];
-			DataBean dataBeanAux = (DataBean)GenerateConfig.skosExtrated.get(dataBean.getName());
-			if (dataBeanAux != null && dataBeanAux.getMapSkos() != null && dataBeanAux.getMapSkos().size() > 0) {
-				String str = dataBeanAux.generateSkosMapping();
-				content = String.valueOf(content) + fieldSeparator + str + fieldSeparator + csvSepartor;
-			} else {
-				content = String.valueOf(content) + fieldSeparator + fieldSeparator + csvSepartor;
+			DataBean[] dataArray = new DataBean[getMapData().keySet().size()];
+			int cont = 0;
+			for (String key : getMapData().keySet()) {
+				DataBean data = getMapData().get(key);
+				dataArray[cont++] = data;
 			}
-			b++;
-		}
-		
-		for (DataBean dataBean : this.listDataConstant)
-			content = String.valueOf(content) + fieldSeparator + dataBean.getConstant() + fieldSeparator + csvSepartor; 
-		
-		content = String.valueOf(content.substring(0, content.length() - 1)) + System.getProperty("line.separator");
-		String nameFile = String.valueOf(GenerateConfig.configDirectoryString) + File.separator + getNameFile();
-		File file = new File(nameFile);
-		
-		try {
-			Utils.stringToFile(content, file);
-		} catch (Exception e) {
-			log.error("Error to generate config file " + getNameFile(), e);
-		}
-		return content;
-	}
 
+			toCsvSpan.setAttribute("dataArray.size", dataArray.length);
+
+
+			byte b;
+			int i;
+			DataBean[] arrayOfDataBean1;
+			for (i = (arrayOfDataBean1 = dataArray).length, b = 0; b < i; ) {
+				DataBean dataBean = arrayOfDataBean1[b];
+				content = String.valueOf(content) + fieldSeparator + dataBean.getName() + fieldSeparator + csvSepartor;
+				b++;
+			}
+
+			for (DataBean dataBean : this.listDataConstant)
+				content = String.valueOf(content) + fieldSeparator + dataBean.getName() + fieldSeparator + csvSepartor;
+			
+			content = String.valueOf(content.substring(0, content.length() - 1)) + System.getProperty("line.separator");
+			
+			for (i = (arrayOfDataBean1 = dataArray).length, b = 0; b < i; ) {
+				DataBean dataBean = arrayOfDataBean1[b];
+				content = String.valueOf(content) + fieldSeparator + dataBean.getNameNormalized() + fieldSeparator + csvSepartor;
+				b++;
+			}
+
+			for (DataBean dataBean : this.listDataConstant)
+				content = String.valueOf(content) + fieldSeparator + dataBean.getNameNormalized() + fieldSeparator + csvSepartor; 
+			
+			content = String.valueOf(content.substring(0, content.length() - 1)) + System.getProperty("line.separator");
+
+			for (i = (arrayOfDataBean1 = dataArray).length, b = 0; b < i; ) {
+				DataBean dataBean = arrayOfDataBean1[b];
+				content = String.valueOf(content) + fieldSeparator + dataBean.getNormalizacion() + fieldSeparator + csvSepartor;
+				b++;
+			}
+			
+			for (DataBean dataBean : this.listDataConstant)
+				content = String.valueOf(content) + fieldSeparator + dataBean.getNormalizacion() + fieldSeparator + csvSepartor; 
+			
+			content = String.valueOf(content.substring(0, content.length() - 1)) + System.getProperty("line.separator");
+			
+			for (i = (arrayOfDataBean1 = dataArray).length, b = 0; b < i; ) {
+				DataBean dataBean = arrayOfDataBean1[b];
+				content = String.valueOf(content) + fieldSeparator + dataBean.getDimensionMesureEntry() + fieldSeparator + csvSepartor;
+				b++;
+			}
+
+			for (DataBean dataBean : this.listDataConstant)
+				content = String.valueOf(content) + fieldSeparator + dataBean.getDimensionMesureEntry() + fieldSeparator + csvSepartor; 
+			
+			content = String.valueOf(content.substring(0, content.length() - 1)) + System.getProperty("line.separator");
+
+			for (i = (arrayOfDataBean1 = dataArray).length, b = 0; b < i; ) {
+				DataBean dataBean = arrayOfDataBean1[b];
+				content = String.valueOf(content) + fieldSeparator + dataBean.getType() + fieldSeparator + csvSepartor;
+				b++;
+			}
+			
+			for (DataBean dataBean : this.listDataConstant)
+				content = String.valueOf(content) + fieldSeparator + dataBean.getType() + fieldSeparator + csvSepartor; 
+			
+			content = String.valueOf(content.substring(0, content.length() - 1)) + System.getProperty("line.separator");
+
+			for (i = (arrayOfDataBean1 = dataArray).length, b = 0; b < i; ) {
+				DataBean dataBean = arrayOfDataBean1[b];
+				DataBean dataBeanAux = (DataBean)GenerateConfig.skosExtrated.get(dataBean.getName());
+				if (dataBeanAux != null && dataBeanAux.getMapSkos() != null && dataBeanAux.getMapSkos().size() > 0) {
+					String str = dataBeanAux.generateSkosMapping();
+					content = String.valueOf(content) + fieldSeparator + str + fieldSeparator + csvSepartor;
+				} else {
+					content = String.valueOf(content) + fieldSeparator + fieldSeparator + csvSepartor;
+				}
+				b++;
+			}
+			
+			for (DataBean dataBean : this.listDataConstant)
+				content = String.valueOf(content) + fieldSeparator + dataBean.getConstant() + fieldSeparator + csvSepartor; 
+			
+			content = String.valueOf(content.substring(0, content.length() - 1)) + System.getProperty("line.separator");
+			String nameFile = String.valueOf(GenerateConfig.configDirectoryString) + File.separator + getNameFile();
+			File file = new File(nameFile);
+			
+			toCsvSpan.setAttribute("output_file", nameFile);
+
+			try {
+				Utils.stringToFile(content, file);
+				toCsvSpan.setAttribute("status", "success");
+				toCsvSpan.addEvent("CSV file successfully written");
+			} catch (Exception e) {
+				toCsvSpan.setAttribute("status", "failure");
+				toCsvSpan.recordException(e);
+				log.error("Error to generate config file " + getNameFile(), e);
+			}
+			return content;
+		
+
+		} finally {
+			toCsvSpan.end();
+		}
+
+	}
 }
