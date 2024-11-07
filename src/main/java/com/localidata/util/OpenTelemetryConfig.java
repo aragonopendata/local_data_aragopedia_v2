@@ -42,8 +42,14 @@ public class OpenTelemetryConfig {
                     .setTimeout(java.time.Duration.ofSeconds(30))
                     .build();
 
+            BatchSpanProcessor batchSpanProcessor = BatchSpanProcessor.builder(otlpExporter)
+                .setScheduleDelay(Duration.ofSeconds(5))
+                .setMaxQueueSize(2048)
+                .setMaxExportBatchSize(512)
+                .build();
+
             SdkTracerProvider tracerProvider = SdkTracerProvider.builder()
-                    .addSpanProcessor(BatchSpanProcessor.builder(otlpExporter).build())
+                    .addSpanProcessor(batchSpanProcessor)
                     .setResource(resource)
                     .build();
 

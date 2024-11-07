@@ -73,7 +73,7 @@ public class Process {
 
 				PropertyConfigurator.configure("log4j.properties");
 				log.info("Start process");
-				// Prop.loadConf();
+				
 				GenerateCSV csv = new GenerateCSV(args[1], args[2]);
 				csv.extractFiles();
 
