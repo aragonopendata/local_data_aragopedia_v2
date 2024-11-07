@@ -178,6 +178,7 @@ public class GenerateCSV {
 					}
 					
 					if (Utils.v(content) && procesar) {
+						scopeExtractFilesCSVSpan.addEvent("Clean and transform");
 						content = cleanAndTransform(content);
 						
 						String hash = Utils.generateHash(content);
@@ -229,6 +230,7 @@ public class GenerateCSV {
 						// ));
 						content = Utils.processURLGet(Prop.urlBiAragon + valores[0] + "&Action=Download&Options=df" , "", headers, cookies, "ISO-8859-1");
 						if (Utils.v(content)) {
+							scopeExtractFilesCSVSpan.addEvent("Clean and transform");
 							content = cleanAndTransform(content);
 							if (!content.contains(Constants.errorDoctypeHtml1) && !content.contains(Constants.errorHtml) && !content.contains(Constants.errorDoctypeHtml2) && !content.contains(Constants.errorDiv) && !content.contains(Constants.errorNingunaFila)) {
 								// retryDownloadFilesSpan.addEvent("File downloaded successfully");
@@ -360,15 +362,8 @@ public class GenerateCSV {
 	}
 
 	private String cleanAndTransform(String content) {
-		Span cleanAndTransformSpan = tracer.spanBuilder("Clean and transform")
-                .setSpanKind(SpanKind.INTERNAL)
-            	.startSpan();
 
-		try(Scope scopeCleanAndTransformSpan = cleanAndTransformSpan.makeCurrent()) {
-
-			cleanAndTransformSpan.setAttribute("initial_content_length", content.length());
-			cleanAndTransformSpan.setAttribute("initial_content", content);
-
+		try{
 			int separador = 0;
 			String cadena_reemplazar = (char)separador + "";
 			content = content.replace(cadena_reemplazar, ""); //REMPLAZAMOS EL CARACTER NULO (EN OCASIONES VIENE UN CARACTER NULO ENTRE CADA CARACTER DEL CONTENIDO)
@@ -377,21 +372,12 @@ public class GenerateCSV {
 			content = content.replace(new String(Character.toChars(0)), "");
 			content = content.replace("ÿþ", "");
 			
-
-			cleanAndTransformSpan.setAttribute("final_content", content);
-
 			return content;
 
 		} catch (Exception e) {
 			log.error(e);
-			cleanAndTransformSpan.recordException(e);
-			cleanAndTransformSpan.setAttribute("error", true);
-            cleanAndTransformSpan.setAttribute("error.message", e.getMessage());
 			throw e;
-		}finally {
-        	cleanAndTransformSpan.end();
-        }
-
+		}
 	}
 
 	public void generateHashCode(List<String> result, List<String> list) {
@@ -480,6 +466,7 @@ public class GenerateCSV {
 					valores[2] = valores[2].replaceAll("\"", "");
 					content = Utils.processURLGet(Prop.urlBiAragon + valores[0] + "&Action=Download&Options=df" , "", headers, cookies, "ISO-8859-1");
 					if (Utils.v(content) && !valores[1].equals("")) {
+						// scopeExtractFilesCSVSpan.addEvent("Clean and transform");
 						content = cleanAndTransform(content);
 						String hash = Utils.generateHash(content);
 						result.append(valores[1]+","+hash+"\n");
@@ -506,6 +493,7 @@ public class GenerateCSV {
 					if (numErrors < 5 && numErrors != -1) {
 						content = Utils.processURLGet(Prop.urlBiAragon + valores[0] + "&Action=Download&Options=df" , "", headers, cookies, "ISO-8859-1");
 						if (Utils.v(content)) {
+							// scopeExtractFilesCSVSpan.addEvent("Clean and transform");
 							content = cleanAndTransform(content);
 							if (!content.contains(Constants.errorDoctypeHtml1) && !content.contains(Constants.errorHtml) && !content.contains(Constants.errorDoctypeHtml2) && !content.contains(Constants.errorDiv)) {
 								Utils.stringToFile(content, new File(outputFilesDirectoryString + File.separator + valores[1] + ".csv"));
