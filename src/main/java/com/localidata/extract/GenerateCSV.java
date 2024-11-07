@@ -178,7 +178,7 @@ public class GenerateCSV {
 					}
 					
 					if (Utils.v(content) && procesar) {
-						scopeExtractFilesCSVSpan.addEvent("Clean and transform");
+						extractFilesCSVSpan.addEvent("Clean and transform");
 						content = cleanAndTransform(content);
 						
 						String hash = Utils.generateHash(content);
@@ -230,7 +230,7 @@ public class GenerateCSV {
 						// ));
 						content = Utils.processURLGet(Prop.urlBiAragon + valores[0] + "&Action=Download&Options=df" , "", headers, cookies, "ISO-8859-1");
 						if (Utils.v(content)) {
-							scopeExtractFilesCSVSpan.addEvent("Clean and transform");
+							extractFilesCSVSpan.addEvent("Clean and transform");
 							content = cleanAndTransform(content);
 							if (!content.contains(Constants.errorDoctypeHtml1) && !content.contains(Constants.errorHtml) && !content.contains(Constants.errorDoctypeHtml2) && !content.contains(Constants.errorDiv) && !content.contains(Constants.errorNingunaFila)) {
 								// retryDownloadFilesSpan.addEvent("File downloaded successfully");
