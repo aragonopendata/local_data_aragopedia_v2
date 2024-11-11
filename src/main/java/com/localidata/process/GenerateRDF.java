@@ -94,6 +94,7 @@ public class GenerateRDF {
 				if (!file.getName().startsWith("mapping") && !file.getName().startsWith(Prop.fileHashCSV)) {
 
 					Span fileProcessingSpan = tracer.spanBuilder("Process Config File: " + file.getName())
+						.setParent(Context.current().with(readConfigSpan))
 						.setSpanKind(SpanKind.INTERNAL)
 						.startSpan();
 
@@ -376,8 +377,9 @@ public class GenerateRDF {
 			int columnReaded = 0;
 			while (cont) {
 				Span columnSpan = tracer.spanBuilder("Process XLSX Column: " + columnReaded)
-                                        .setSpanKind(SpanKind.INTERNAL)
-                                        .startSpan();
+					.setParent(Context.current().with(readXlsxFileSpan))
+					.setSpanKind(SpanKind.INTERNAL)
+					.startSpan();
 
                 try (Scope columnScope = columnSpan.makeCurrent()) {
 
@@ -531,6 +533,7 @@ public class GenerateRDF {
 					}
 
 					Span rowSpan = tracer.spanBuilder("Process SKOS Row " + i)
+						.setParent(Context.current().with(readMappingFileSpan))
 						.setSpanKind(SpanKind.INTERNAL)
 						.startSpan();
 
