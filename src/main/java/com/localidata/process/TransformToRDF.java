@@ -36,6 +36,7 @@ import io.opentelemetry.api.common.Attributes;
 public class TransformToRDF {
 
 	private final static Logger log = Logger.getLogger(TransformToRDF.class);
+	private static final Tracer tracer = OpenTelemetryConfig.getTracer(); 
 	private List<String> csvLines = null;
 	private String rdfFinal = "";
 	private String rdfProperties = "";
@@ -118,7 +119,7 @@ public class TransformToRDF {
 					String line = Utils.weakClean(dirtyLine);
 					if (!Utils.v(line))
 						continue;
-					if (cabecera) {{
+					if (cabecera) {
 
 						dsd = Prop.host + "/" + Prop.eldaName + "/" + Prop.datasetName + "/dsd/" + id;
 						if(csvLines.size()<=2){
@@ -221,12 +222,14 @@ public class TransformToRDF {
             .setSpanKind(SpanKind.INTERNAL)
             .startSpan();
 
+		StringBuffer result = new StringBuffer();
+
 		try (Scope scopeAddObservationSpan = addObservationSpan.makeCurrent()) {
 
 			addObservationSpan.setAttribute("fileName", fileName);
        		addObservationSpan.setAttribute("lineLength", line.length());
 
-			StringBuffer result = new StringBuffer();
+			
 			String endResult = "";
 			boolean year = false;
 			boolean month = false;
@@ -279,8 +282,9 @@ public class TransformToRDF {
 												String errorMessage = fileName + ". ERROR. Column " + header + ". NO SKOS VALID BY " + normalizedCell;
 												insertError(errorMessage);
 												log.error(errorMessage);
-												addObservationSpan.recordException(new IllegalArgumentException(errorMessage));
-												addObservationSpan.setStatus(StatusCode.ERROR, errorMessage);
+
+												addObservationSpan.setAttribute("error", true);
+            									addObservationSpan.setAttribute("error.message", errorMessage);
 											} else {
 												result.append("\t" + dataBean.getNormalizacion() + " <" + ((SkosBean)dataBean.getMapSkos().get(normalizedCell)).getURI() + "> ;" + "\n");
 												((SkosBean)dataBean.getMapSkos().get(normalizedCell)).setLabel(Utils.weakClean(cell));
@@ -324,8 +328,8 @@ public class TransformToRDF {
 										String errorMessage2 = String.valueOf(fileName) + ". WARNING. Column " + header + ". MIXED CODE AND VALUE";
 										insertError(errorMessage2);
 										cell = cell.substring(cell.indexOf("-") + 1, cell.length());
-										addObservationSpan.recordException(new IllegalArgumentException(errorMessage2));
-										addObservationSpan.setStatus(StatusCode.ERROR, errorMessage2);
+										addObservationSpan.setAttribute("error", true);
+            							addObservationSpan.setAttribute("error.message", errorMessage2);
 									} 
 									if (Utils.v(cell)) {
 										String urlRefArea = Utils.getUrlRefArea(header, cell, fileName);
@@ -340,14 +344,14 @@ public class TransformToRDF {
 								insertError(errorMessage3);
 								log.error(errorMessage3);
 
-								addObservationSpan.recordException(new IllegalArgumentException(errorMessage3));
-								addObservationSpan.setStatus(StatusCode.ERROR, errorMessage3);
+								addObservationSpan.setAttribute("error", true);
+            					addObservationSpan.setAttribute("error.message", errorMessage3);
 							} 
 							String errorMessage4 = String.valueOf(fileName) + ". ERROR. Column " + header + ". CONFIGURATION FOR THIS COLUMN NOT FOUND ";
 							insertError(errorMessage4);
 							log.error(errorMessage4);
-							addObservationSpan.recordException(new IllegalArgumentException(errorMessage4));
-							addObservationSpan.setStatus(StatusCode.ERROR, errorMessage4);
+							addObservationSpan.setAttribute("error", true);
+            				addObservationSpan.setAttribute("error.message", errorMessage4);
 						} 
 						col++;
 					} catch (Exception e) {
@@ -406,7 +410,6 @@ public class TransformToRDF {
 			} catch (Exception e) {
 				log.error("Error generando los datos comunes (dsd, properties, kos)", e);
 				generateCommonDataSpan.recordException(e);
-            	generateCommonDataSpan.setStatus(StatusCode.ERROR, "Error loading specsTtlFile");
 			}
 
 			for (String keyConfig : mapconfig.keySet()) {
@@ -442,11 +445,12 @@ public class TransformToRDF {
 					int col = 1;
 					for (String keyData : config.getMapData().keySet()) {
 
+						
+						DataBean data = config.getMapData().get(keyData);
 						Span dataSpan = tracer.spanBuilder("Process DataBean")
                             .setAttribute("data.id", data.getIdConfig())
                             .setAttribute("data.normalization", data.getNormalizacion())
                             .startSpan();
-						DataBean data = config.getMapData().get(keyData);
 
 						try (Scope dataScope = dataSpan.makeCurrent()) {
 
@@ -496,11 +500,13 @@ public class TransformToRDF {
 													if (Utils.weakClean(data.getName()).equals("")) {
 														TransformToRDF.insertError(config.getId() + ". ERROR. CELL EMPTY " + ". SKOS FOR THIS COLUMN NOT FOUND ");
 														log.error(config.getId() + ". ERROR. CELL EMPTY " + ". SKOS FOR THIS COLUMN NOT FOUND ");
-														dataSpan.setStatus(StatusCode.ERROR, config.getId() + ". ERROR. CELL EMPTY " + ". SKOS FOR THIS COLUMN NOT FOUND ");
+														dataSpan.setAttribute("otel.status_code", "ERROR");
+														dataSpan.setAttribute("error.message", config.getId() + ". ERROR. CELL EMPTY " + ". SKOS FOR THIS COLUMN NOT FOUND ");
 													}
 													TransformToRDF.insertError(config.getId() + ". ERROR. Column " + Utils.weakClean(data.getName()) + ". SKOS FOR THIS COLUMN NOT FOUND ");
 													log.error(config.getId() + ". ERROR. Column " + Utils.weakClean(data.getName()) + ". SKOS FOR THIS COLUMN NOT FOUND ");
-													dataSpan.setStatus(StatusCode.ERROR, config.getId() + ". ERROR. Column " + Utils.weakClean(data.getName()) + ". SKOS FOR THIS COLUMN NOT FOUND ");
+													dataSpan.setAttribute("otel.status_code", "ERROR");
+													dataSpan.setAttribute("error.message", config.getId() + ". ERROR. Column " + Utils.weakClean(data.getName()) + ". SKOS FOR THIS COLUMN NOT FOUND ");
 												}
 											} else {
 												propertiesContent.append(" ." + "\n");
@@ -527,7 +533,6 @@ public class TransformToRDF {
 
 						} catch (Exception e) {
 							dataSpan.recordException(e);
-							dataSpan.setStatus(StatusCode.ERROR, "Error processing DataBean");
 						} finally {
 							dataSpan.end();
 						}
@@ -542,7 +547,6 @@ public class TransformToRDF {
 
 				} catch (Exception e) {
 					configSpan.recordException(e);
-					configSpan.setStatus(StatusCode.ERROR, "Error processing ConfigBean");
 				} finally {
 					configSpan.end();
 				}
@@ -551,7 +555,6 @@ public class TransformToRDF {
 
 		} catch (Exception e) {
 			generateCommonDataSpan.recordException(e);
-			generateCommonDataSpan.setStatus(StatusCode.ERROR, "Error in generateCommonData");
 		} finally {
 			generateCommonDataSpan.end();
 		}
