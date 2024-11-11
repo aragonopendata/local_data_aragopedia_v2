@@ -533,12 +533,12 @@ public class GenerateRDF {
 						continue;
 					}
 
-					Span rowSpan = tracer.spanBuilder("Process SKOS Row " + i)
-						.setParent(Context.current().with(readMappingFileSpan))
-						.setSpanKind(SpanKind.INTERNAL)
-						.startSpan();
+					// Span rowSpan = tracer.spanBuilder("Process SKOS Row " + i)
+					// 	.setParent(Context.current().with(readMappingFileSpan))
+					// 	.setSpanKind(SpanKind.INTERNAL)
+					// 	.startSpan();
 
-					try (Scope rowScope = rowSpan.makeCurrent()) {
+					// try (Scope rowScope = rowSpan.makeCurrent()) {
 
 						SkosBean skosBean = new SkosBean();
 						SkosBean skosBeanExtra = new SkosBean();
@@ -553,8 +553,8 @@ public class GenerateRDF {
 						idCell = Utils.urlify(idCell);
 						skosBean.setId(idCell);
 
-						rowSpan.setAttribute("skos.id", skosBean.getId());
-                    	rowSpan.setAttribute("skos.label", skosBean.getLabel());
+						// rowSpan.setAttribute("skos.id", skosBean.getId());
+                    	// rowSpan.setAttribute("skos.label", skosBean.getLabel());
 
 						String uriCell = "";
 						if (cellUri.getCellType() == 0) {
@@ -573,11 +573,11 @@ public class GenerateRDF {
 						skosBean.setURI(uriCell);
 						mapSkos.put(idCell, skosBean);
 
-						rowSpan.setAttribute("skos.uri", skosBean.getURI());
+						// rowSpan.setAttribute("skos.uri", skosBean.getURI());
 
-					} finally {
-						rowSpan.end();
-					}
+					// } finally {
+					// 	rowSpan.end();
+					// }
 				}
 			}
 
