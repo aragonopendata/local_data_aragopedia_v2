@@ -39,6 +39,7 @@ import io.opentelemetry.context.Scope;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.context.Context;
 
 
 /**
