@@ -806,6 +806,8 @@ public class GenerateRDF {
 							List<String> csvLines = FileUtils.readLines(file, "UTF-8");
 							String description = idDescription.get(fileName + fileLetter);
 
+							fileProcessingSpan.setAttribute("output.file", outputDirectoryFile);
+
 							if (description != null) {
 								fileProcessingSpan.setAttribute("file.description", description);
 							}
@@ -833,6 +835,8 @@ public class GenerateRDF {
 					fileProcessingSpan.end();
 				}
 			}
+
+			// !!!! pendiente
 			TransformToRDF transformToRDF = new TransformToRDF(propertiesFile, dsdFile, errorReportFile, specsTtlFileString);
 			transformToRDF.generateCommonData(mapconfig, idDescription);
 

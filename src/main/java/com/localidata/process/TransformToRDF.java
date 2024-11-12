@@ -79,17 +79,17 @@ public class TransformToRDF {
 	public void initTransformation(String fileName, int numfile, String id, ArrayList<String> dsdList, ArrayList<String> propertiesList, String decription) {
 		log.info("Init initTransformation");
 
-		Span initTransformationSpan = tracer.spanBuilder("initTransformation")
-            .setSpanKind(SpanKind.INTERNAL)
-            .startSpan();
+		// Span initTransformationSpan = tracer.spanBuilder("initTransformation")
+        //     .setSpanKind(SpanKind.INTERNAL)
+        //     .startSpan();
 		
-		try (Scope scopeInitTransformationSpan = initTransformationSpan.makeCurrent()) {
+		// try (Scope scopeInitTransformationSpan = initTransformationSpan.makeCurrent()) {
 
-			initTransformationSpan.setAttribute("fileName", fileName);
-			initTransformationSpan.setAttribute("id", id);
-			initTransformationSpan.setAttribute("numfile", numfile);
-			initTransformationSpan.setAttribute("csvLines.size", csvLines.size());
-			initTransformationSpan.setAttribute("description", decription);
+		// 	initTransformationSpan.setAttribute("fileName", fileName);
+		// 	initTransformationSpan.setAttribute("id", id);
+		// 	initTransformationSpan.setAttribute("numfile", numfile);
+		// 	initTransformationSpan.setAttribute("csvLines.size", csvLines.size());
+		// 	initTransformationSpan.setAttribute("description", decription);
 
 			if (this.csvLines != null && this.csvLines.size() >= 2) {
 				log.debug("Start file " + fileName);
@@ -128,30 +128,29 @@ public class TransformToRDF {
 							addHeader(line, csvLines.get(h + 2), id, numfile, configBean.getLetters());
 						}
 						
-						log.debug("Insert header");
+						//log.debug("Insert header");
 						lineAux.append("#Observations\n");
 						lineAux.append(addCubeLink(fileName, dsd));
 						cabecera = false;
 					} else {
 						lineAux.setLength(0);
 						lineAux.append(addObservation(line, fileName));
-						log.debug("Insert line " + numLine);
+						//log.debug("Insert line " + numLine);
 					}
 					Utils.stringToFileAppend(lineAux.toString(), outputDirectoryFile);
 					numLine++;
 				}
-				log.debug("Insert observations");
+				//log.debug("Insert observations");
 
 			}
-		} catch (Exception e) {
-			initTransformationSpan.setAttribute("error", true);
-			initTransformationSpan.setAttribute("error.message", e.getMessage());
-			log.error("Error in initTransformation", e);
-		} finally {
-			initTransformationSpan.end();
-			log.debug("End initTransformation");
-		}
-		log.debug("End initTransformation");
+		// } catch (Exception e) {
+		// 	initTransformationSpan.setAttribute("error", true);
+		// 	initTransformationSpan.setAttribute("error.message", e.getMessage());
+		// 	log.error("Error in initTransformation", e);
+		// } finally {
+		// 	initTransformationSpan.end();
+		// 	//log.debug("End initTransformation");
+		// }
 	}
 
 	public static StringBuffer addPrefix() {
@@ -217,17 +216,17 @@ public class TransformToRDF {
 	}
 
 	private StringBuffer addObservation(String line, String fileName) {
-		log.info("Init addObservation " + line + " " + fileName);
-		Span addObservationSpan = tracer.spanBuilder("Add Observation - " + fileName)
-            .setSpanKind(SpanKind.INTERNAL)
-            .startSpan();
+		//log.info("Init addObservation " + line + " " + fileName);
+		// Span addObservationSpan = tracer.spanBuilder("Add Observation - " + fileName)
+        //     .setSpanKind(SpanKind.INTERNAL)
+        //     .startSpan();
 
 		StringBuffer result = new StringBuffer();
 
-		try (Scope scopeAddObservationSpan = addObservationSpan.makeCurrent()) {
+		//try (Scope scopeAddObservationSpan = addObservationSpan.makeCurrent()) {
 
-			addObservationSpan.setAttribute("fileName", fileName);
-       		addObservationSpan.setAttribute("lineLength", line.length());
+			// addObservationSpan.setAttribute("fileName", fileName);
+       		// addObservationSpan.setAttribute("lineLength", line.length());
 
 			
 			String endResult = "";
@@ -239,7 +238,7 @@ public class TransformToRDF {
 				return result;
 			}
 			String id = Utils.genUUIDHash(cleanLine);
-			addObservationSpan.setAttribute("observationId", id);
+			// addObservationSpan.setAttribute("observationId", id);
 			log.info("id: " + id);
 
 			result.append("<" + Prop.host + "/" + Prop.eldaName + "/" + Prop.datasetName + "/observacion/" + fileName + "/" + id + "> a qb:Observation ;" + "\n");
@@ -255,36 +254,36 @@ public class TransformToRDF {
 			for (i = (arrayOfString1 = cells).length, b = 0; b < i; ) {
 				String cell = arrayOfString1[b];
 				String normalizedCell = Utils.urlify(cell);
+				String errorMessage = "";
 
 				log.info("normalizedCell: " + normalizedCell);
 
 
 				if (this.normalizedHeader.size() <= col - 1) {
-					insertError(String.valueOf(fileName) + ". ERROR. " + "COLUMN NAME MISSING  ");
-					log.error(String.valueOf(fileName) + ". ERROR. " + "COLUMN NAME MISSING  ");
-					addObservationSpan.addEvent("Column Name Missing", Attributes.of(AttributeKey.stringKey("header"), fileName));
+					errorMessage = String.valueOf(fileName) + ". ERROR. " + "COLUMN NAME MISSING  ";
 				} else {
 					String header = this.normalizedHeader.get(col - 1);
 					this.cleanHeader.get(col - 1);
 					DataBean dataBean = (DataBean)this.configBean.getMapData().get(header);
 
 					log.info("header: " + header);
-					addObservationSpan.setAttribute("currentHeader", header);
+					//addObservationSpan.setAttribute("currentHeader", header);
 					try {
 						if (dataBean != null) {
 							if (dataBean.getNormalizacion() != null)
 								if (normalizedCell.equals("")) {
-									insertError(String.valueOf(fileName) + ". ERROR. Column " + header + ". NO VALUE ");
+									errorMessage = String.valueOf(fileName) + ". ERROR. Column " + header + ". NO VALUE ";
+									insertError(errorMessage);
 								} else if (!dataBean.getType().contains("URI")) {
 									if (!dataBean.getNormalizacion().equals("sdmx-dimension:refPeriod")) {
 										if (dataBean.getType().equals("skos:Concept")) {
 											if (dataBean.getMapSkos().get(normalizedCell) == null) {
-												String errorMessage = fileName + ". ERROR. Column " + header + ". NO SKOS VALID BY " + normalizedCell;
+												errorMessage = fileName + ". ERROR. Column " + header + ". NO SKOS VALID BY " + normalizedCell;
 												insertError(errorMessage);
 												log.error(errorMessage);
 
-												addObservationSpan.setAttribute("error", true);
-            									addObservationSpan.setAttribute("error.message", errorMessage);
+												// addObservationSpan.setAttribute("error", true);
+            									// addObservationSpan.setAttribute("error.message", errorMessage);
 											} else {
 												result.append("\t" + dataBean.getNormalizacion() + " <" + ((SkosBean)dataBean.getMapSkos().get(normalizedCell)).getURI() + "> ;" + "\n");
 												((SkosBean)dataBean.getMapSkos().get(normalizedCell)).setLabel(Utils.weakClean(cell));
@@ -295,7 +294,7 @@ public class TransformToRDF {
 											result.append("\t" + dataBean.getNormalizacion() + " \"" + Utils.weakClean(cell) + "\"^^" + dataBean.getType() + ";" + "\n");
 										}
 									} else if (dataBean.getNormalizacion().equals("sdmx-dimension:refPeriod")) {
-										addObservationSpan.addEvent("Processing refPeriod");
+										//addObservationSpan.addEvent("Processing refPeriod");
 										try {
 											if (dataBean.getNameNormalized().equals("ano")){
 												year = true;
@@ -325,11 +324,11 @@ public class TransformToRDF {
 									Matcher m = r.matcher(cell);
 
 									if (m.find()) {
-										String errorMessage2 = String.valueOf(fileName) + ". WARNING. Column " + header + ". MIXED CODE AND VALUE";
-										insertError(errorMessage2);
+										String errorMessage = String.valueOf(fileName) + ". WARNING. Column " + header + ". MIXED CODE AND VALUE";
+										insertError(errorMessage);
 										cell = cell.substring(cell.indexOf("-") + 1, cell.length());
-										addObservationSpan.setAttribute("error", true);
-            							addObservationSpan.setAttribute("error.message", errorMessage2);
+										// addObservationSpan.setAttribute("error", true);
+            							// addObservationSpan.setAttribute("error.message", errorMessage2);
 									} 
 									if (Utils.v(cell)) {
 										String urlRefArea = Utils.getUrlRefArea(header, cell, fileName);
@@ -340,24 +339,44 @@ public class TransformToRDF {
 						} else {
 							if (header.equals("")) {
 								
-								String errorMessage3 = String.valueOf(fileName) + ". ERROR. HEADER COLUMN EMPTY " + ". CONFIGURATION FOR THIS COLUMN NOT FOUND ";
-								insertError(errorMessage3);
-								log.error(errorMessage3);
+								String errorMessage = String.valueOf(fileName) + ". ERROR. HEADER COLUMN EMPTY " + ". CONFIGURATION FOR THIS COLUMN NOT FOUND ";
+								insertError(errorMessage);
+								log.error(errorMessage);
 
-								addObservationSpan.setAttribute("error", true);
-            					addObservationSpan.setAttribute("error.message", errorMessage3);
+								// addObservationSpan.setAttribute("error", true);
+            					// addObservationSpan.setAttribute("error.message", errorMessage);
 							} 
-							String errorMessage4 = String.valueOf(fileName) + ". ERROR. Column " + header + ". CONFIGURATION FOR THIS COLUMN NOT FOUND ";
-							insertError(errorMessage4);
-							log.error(errorMessage4);
-							addObservationSpan.setAttribute("error", true);
-            				addObservationSpan.setAttribute("error.message", errorMessage4);
+							String errorMessage = String.valueOf(fileName) + ". ERROR. Column " + header + ". CONFIGURATION FOR THIS COLUMN NOT FOUND ";
+							insertError(errorMessage);
+							log.error(errorMessage);
+							// addObservationSpan.setAttribute("error", true);
+            				// addObservationSpan.setAttribute("error.message", errorMessage4);
 						} 
 						col++;
 					} catch (Exception e) {
 						log.error("Error al auna observacion en " + this.configBean.getNameFile(), e);
 					} 
 				} 
+
+				if (errorMessage != ""){
+
+					Span addObsColumnMissingSpan = tracer.spanBuilder("initTransformation")
+					    .setSpanKind(SpanKind.INTERNAL)
+					    .startSpan();
+						
+					try (Scope scopeAddObsColumnMissingSpan = addObsColumnMissingSpan.makeCurrent()) {
+
+
+						insertError(errorMessage);
+						log.error(errorMessage);
+						addObsColumnMissingSpan.setAttribute("error", true);
+						addObsColumnMissingSpan.setAttribute("error.message", errorMessage);
+
+					} finally {
+						addObsColumnMissingSpan.end();
+					}
+
+				}
 				b++;
 			}
 			if (this.configBean.getListDataConstant().size() > 0) {
@@ -381,9 +400,9 @@ public class TransformToRDF {
 			result = new StringBuffer(endResult);
 			log.debug("End addObservation");
 
-		} finally {
-			addObservationSpan.end();
-		}
+		// } finally {
+		// 	addObservationSpan.end();
+		// }
 		return result;
 	}
 
