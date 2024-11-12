@@ -29,14 +29,14 @@ public class GithubApi {
 		
 		String body = "{" + "\"title\": \"" + titulo + "\"," + "\"body\": \"" + cuerpo + "\"" + "}";
 		body = body.replace("\n", "\\n");
-		log.info("Body create issue "+body);
+		//log.info("Body create issue "+body);
 		
 		try {
 			Utils.processURLPost(Prop.githubURLIssues, "", headers, body, "ISO-8859-1");
 		} catch (Exception e) {
 			log.error("Error creando una incidencia en github",e);
 		}
-		log.info("end createIssue");
+		//log.info("end createIssue");
 	}
 
 	public static void main(String[] args) {
@@ -45,7 +45,7 @@ public class GithubApi {
 			PropertyConfigurator.configure("log4j.properties");
 		Prop.loadConf();
 
-		 GithubApi.createIssue("Prueba de creación de issue desde API","Esto es una prueba de creación de una isssue desde la API de GitHub realizada por @aragopedia");
+		GithubApi.createIssue("Prueba de creación de issue desde API","Esto es una prueba de creación de una isssue desde la API de GitHub realizada por @aragopedia");
 
 	}
 

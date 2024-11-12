@@ -84,7 +84,7 @@ public class GenerateConfig {
 				letters = file.getName().substring(file.getName().length() - 6, file.getName().length() - 4);
 			}
 
-			log.info("Comienza tratamiento para " + id + letters);
+			//log.info("Comienza tratamiento para " + id + letters);
 			ConfigBean configBean = null;
 			if (configExtrated.get(id) != null) {
 				configBean = configExtrated.get(id);
@@ -221,7 +221,7 @@ public class GenerateConfig {
 				log.error("Error to read lines", e);
 			}
 			configExtrated.put(configBean.getId(), configBean);
-			log.info("Finaliza tratamiento para " + id + letters);
+			//log.info("Finaliza tratamiento para " + id + letters);
 		}
 
 		cont = 0;
@@ -310,7 +310,7 @@ public class GenerateConfig {
 				log.error("Error to read lines", e);
 			}
 			configExtrated.put(id + letters, configBean);
-			log.info("Finaliza tratamiento para " + id + letters);
+			//log.info("Finaliza tratamiento para " + id + letters);
 		}
 
 		log.info("End generateUpdateConfig");
@@ -318,7 +318,7 @@ public class GenerateConfig {
 	}
 
 	private void extractSkosConcept(List<String> csvLines, ArrayList<DataBean> skosData, ConfigBean configBean) {
-		log.debug("Init extractSkosConcept");
+		//log.debug("Init extractSkosConcept");
 		String headerLine = Utils.weakClean(csvLines.get(0));
 		String[] cells = headerLine.split("\t");
 		int[] posColumn = new int[skosData.size()];
@@ -377,12 +377,12 @@ public class GenerateConfig {
 				}
 			}
 		}
-		log.debug("End extractSkosConcept");
+		//log.debug("End extractSkosConcept");
 	}
 
 
 	private ArrayList<String> extractDimensionsLocal(File file) {
-		log.debug("Init extractDimensionsLocal");
+		//log.debug("Init extractDimensionsLocal");
 		ArrayList<String> result = new ArrayList<>();
 		ArrayList<HashSet<String>> countValues = new ArrayList<>();
 		List<String> csvLines = null;
@@ -415,7 +415,7 @@ public class GenerateConfig {
 				result.add(Utils.dimensionStrongClean(headerCells[o]) + ".txt");
 			}
 		}
-		log.debug("End extractDimensionsLocal");
+		//log.debug("End extractDimensionsLocal");
 		return result;
 	}
 
@@ -431,7 +431,7 @@ public class GenerateConfig {
 	}
 
 	public void generateSkosMapping(boolean update) {
-		log.debug("Init generateSkosMapping");
+		//log.debug("Init generateSkosMapping");
 		String filedSeparator = "\"";
 		String csvSeparator = ",";
 
@@ -446,21 +446,21 @@ public class GenerateConfig {
 			}
 			String nameFile = "mapping-" + Utils.urlify(data.getName());
 			String pathFile = configDirectoryString + File.separator + nameFile + ".csv";
-			log.info("comienza a escribirse el archivo " + nameFile + ".csv");
+			//log.info("comienza a escribirse el archivo " + nameFile + ".csv");
 			File file = new File(pathFile);
 			try {
 				Utils.stringToFile(content.toString(), file);
-				log.info("finaliza de escribirse el archivo " + nameFile + ".csv");
+				//log.info("finaliza de escribirse el archivo " + nameFile + ".csv");
 			} catch (Exception e) {
 				log.error("Error to generate skos mapping " + pathFile, e);
 			}
 
 		}
-		log.debug("End generateSkosMapping");
+		//log.debug("End generateSkosMapping");
 	}
 
 	public void updateConfig(List<String> changes, List<String> news, HashMap<String, ConfigBean> configMap) {
-		log.info("init updateConfig");
+		//log.info("init updateConfig");
 		HashMap<String, ConfigBean> configExtrated = generateUpdateConfig();
 		this.configMap = configMap;
 		String mensaje = "";
@@ -486,7 +486,7 @@ public class GenerateConfig {
 		}
 
 		for (String change : changes) {
-			log.info("Detectando si hay cambios en " + change);
+			//log.info("Detectando si hay cambios en " + change);
 			String id = "";
 			String letters = "";
 			boolean detectadoCambio = false;
@@ -510,7 +510,7 @@ public class GenerateConfig {
 				List<String> csvLinesDrive = FileUtils.readLines(file, "UTF-8");
 				List cellsDriveList = new ArrayList();
 				String lineClean = csvLinesDrive.get(0);
-				log.debug("csvLinesDrive "+lineClean);
+				//log.debug("csvLinesDrive "+lineClean);
 				lineClean = lineClean.replace("'", "");
 				int charac = 0;
 				int first = -1;
@@ -537,7 +537,7 @@ public class GenerateConfig {
 				File fileLocal = new File(inputDirectoryString + File.separator + change + ".csv");
 				List<String> csvLinesLocal = FileUtils.readLines(fileLocal, "UTF-8");
 				lineClean = csvLinesLocal.get(0);
-				log.debug("csvLinesLocal "+lineClean);
+				//log.debug("csvLinesLocal "+lineClean);
 				lineClean = lineClean.replace("'", "");
 				lineClean = lineClean.replace("", "");
 				Object[] cellsLocalArray = Utils.split(lineClean, "\t");				
@@ -668,15 +668,14 @@ public class GenerateConfig {
 			log.error("Error escribiendo el fichero de cubos de datos a borrar",e);
 		}
 		
-		if (Utils.v(mensajesNuevos) || Utils.v(mensajesCambiosNuevaConf) || Utils.v(mensajeCambiosConf) || Utils.v(mensajeRegenerar) || Utils.v(mensajesBorrados)) {
-			if (true) {
-				mensaje = mensajesNuevos + mensajesCambiosNuevaConf + mensajeCambiosConf + mensajeRegenerar + mensajesBorrados;
-				String titulo = "Cambios en los datos del IAEsT " + Utils.getDate();
-				if(Prop.createIssue)
-					GithubApi.createIssue(titulo, mensaje);
-			}
-		}
-		log.info("end updateConfig");
+		// if (Utils.v(mensajesNuevos) || Utils.v(mensajesCambiosNuevaConf) || Utils.v(mensajeCambiosConf) || Utils.v(mensajeRegenerar) || Utils.v(mensajesBorrados)) {
+		// 	mensaje = mensajesNuevos + mensajesCambiosNuevaConf + mensajeCambiosConf + mensajeRegenerar + mensajesBorrados;
+		// 	String titulo = "Cambios en los datos del IAEsT " + Utils.getDate();
+		// 	if(Prop.createIssue)
+		// 		GithubApi.createIssue(titulo, mensaje);
+			
+		// }
+		//log.info("end updateConfig");
 	}
 
 	public HashSet<String> getFilesNotRDF() {
@@ -692,14 +691,14 @@ public class GenerateConfig {
 		if ((log == null) || (log.getLevel() == null))
 			PropertyConfigurator.configure("log4j.properties");
 		if (args.length == 4) {
-			log.info("Start process");
+			//log.info("Start process");
 			Prop.loadConf();
 			GenerateConfig config = null;
 			if (args[0].equals("update")) {
 				config = new GenerateConfig(args[2], args[3], args[4], args[5]);
 			}
 
-			log.info("Finish process");
+			//log.info("Finish process");
 		} else {
 			log.info("Se deben de pasar dos parámetros: ");
 			log.info("La cadena de texto config ");

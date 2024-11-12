@@ -223,11 +223,8 @@ public class GenerateCSV {
         			// retryDownloadFilesSpan.setAttribute("current_attempts", numErrors);
 
 					while (numErrors < 5 && numErrors != -1 && sucess ) {
-						log.info("Intento "+numErrors+" del csv "+valores[0]);
-						// retryDownloadFilesSpan.addEvent("Attempting download", Attributes.of(
-						// 	AttributeKey.longKey("attempt_number"), numErrors.longValue(),
-						// 	AttributeKey.stringKey("csv_file"), valores[0]
-						// ));
+						//log.info("Intento "+numErrors+" del csv "+valores[0]);
+	
 						content = Utils.processURLGet(Prop.urlBiAragon + valores[0] + "&Action=Download&Options=df" , "", headers, cookies, "ISO-8859-1");
 						if (Utils.v(content)) {
 							extractFilesCSVSpan.addEvent("Clean and transform");
@@ -305,22 +302,19 @@ public class GenerateCSV {
         	processContentFileSpan.setAttribute("hash", hash);
 		
 			boolean safeFile = false;
-			log.debug("processContentFile hash "+hash);
+			//log.debug("processContentFile hash "+hash);
 			if (hashCodeOld.get(valores[1]) == null) {
-				processContentFileSpan.addEvent("New data cube found");
+				processContentFileSpan.addEvent("New data cube found: " + valores[1]);
 				news.add(valores[1]);
 				all.add(valores[0] + "," + valores[1]);
 				safeFile = true;
-				log.info("Se ha encontrado un nuevo cubo de datos: " + valores[1]);
 			} else if (!hashCodeOld.get(valores[1]).equals(hash)) {
-				processContentFileSpan.addEvent("Changes detected in data cube");
+				processContentFileSpan.addEvent("Changes detected in data cube: " + valores[1]);
 				changes.add(valores[1]);
 				all.add(valores[0] + "," + valores[1]);
 				safeFile = true;
-				log.info("Se han encontrado cambios en el cubo de datos " + valores[1]);
 			} else {
-				processContentFileSpan.addEvent("No changes detected in data cube");
-				log.info("No hay cambios en el cubo de datos " + valores[1]);
+				processContentFileSpan.addEvent("No changes detected in data cube: " + valores[1]);
 			}
 			if (safeFile) {
 				
@@ -329,8 +323,7 @@ public class GenerateCSV {
 					processContentFileSpan.addEvent("File content validated successfully");
 					Utils.stringToFile(content, new File(outputFilesDirectoryString + File.separator + valores[1] + ".csv"));
 					hashCodeNew.put(valores[1], hash);
-					log.info("Descargado csv " + valores[1]);
-					processContentFileSpan.setAttribute("status", "file_downloaded");
+					processContentFileSpan.setAttribute("status", "file_downloaded: "  + valores[1]);
 
 				} else if (!content.contains(Constants.errorExcedidoN) && !content.contains(Constants.errorRutaNoEncontrada) && !content.contains(Constants.errorNingunaFila)) {
 					processContentFileSpan.addEvent("File download failed - validation error");
@@ -338,23 +331,21 @@ public class GenerateCSV {
 					errorFiles.put(valores, content);
 					news.remove(valores[1]);
 					changes.remove(valores[1]);
-					log.info("El csv " + valores[1] + " no se pudo descargar");
-					processContentFileSpan.setAttribute("status", "file_download_failed");
+					processContentFileSpan.setAttribute("status", "file_download_failed: " + valores[1]);
                 	processContentFileSpan.setAttribute("failure_reason", "Validation error in content");
 				} else {
 					processContentFileSpan.addEvent("Critical error during file download");
 					informeErrores(valores[1], content);
 					news.remove(valores[1]);
 					changes.remove(valores[1]);
-					log.info("El csv " + valores[1] + " no se pudo descargar");
-					processContentFileSpan.setAttribute("status", "file_download_failed");
+					processContentFileSpan.setAttribute("status", "file_download_failed: " + valores[1]);
                 	processContentFileSpan.setAttribute("failure_reason", "Critical error during file download");
 				}
 			}
 		} catch (Exception e) {
 			processContentFileSpan.recordException(e);
 			processContentFileSpan.setAttribute("error", true);
-			log.error("Error en processContentFile para el archivo " + valores[1], e);
+			processContentFileSpan.setAttribute("file", valores[1]);
 			throw e;
 		} finally {
 			processContentFileSpan.end();
@@ -470,7 +461,7 @@ public class GenerateCSV {
 						content = cleanAndTransform(content);
 						String hash = Utils.generateHash(content);
 						result.append(valores[1]+","+hash+"\n");
-						log.info(valores[1]+","+hash);
+						//log.info(valores[1]+","+hash);
 					}else{
 						numErrorFiles.put(valores, new Integer(0));
 						errorFiles.put(valores, content);
@@ -479,7 +470,7 @@ public class GenerateCSV {
 			} catch (IOException e2) {
 				numErrorFiles.put(valores, new Integer(0));
 				errorFiles.put(valores, content);
-				log.error("Error al descargar " + valores[1], e2);
+				//log.error("Error al descargar " + valores[1], e2);
 			}
 			
 			int j = 0;
@@ -504,7 +495,7 @@ public class GenerateCSV {
 							} else if (!content.contains(Constants.errorExcedidoN) && !content.contains(Constants.errorRutaNoEncontrada)) {
 								numErrorFiles.put(valores, new Integer(-1));
 							} else {
-								log.error("Informe " + valores[1] + " imposible de descargar intento " + (numErrors + 1));
+								//log.error("Informe " + valores[1] + " imposible de descargar intento " + (numErrors + 1));
 								numErrorFiles.put(valores, ++numErrors);
 							}
 						}
@@ -521,7 +512,7 @@ public class GenerateCSV {
 			
 			try {
 				Utils.stringToFile(result.toString(), hashFile);
-				log.info("Hashcode generado correctamente");
+				//log.info("Hashcode generado correctamente");
 			} catch (Exception e) {
 				log.error("Error generando fichero hashcode", e);
 			}
@@ -568,7 +559,7 @@ protected void informeErrores(String id, String content) {
         } else {
             informeErroresSpan.addEvent("Content is null");
             informeErroresSpan.setAttribute("error", true);
-            log.warn("Content provided to informeErrores is null for file ID: " + id);
+            //log.warn("Content provided to informeErrores is null for file ID: " + id);
         }
     } catch (Exception e) {
         informeErroresSpan.recordException(e);
@@ -599,7 +590,7 @@ protected void extractHashCode() {
         } catch (Exception e1) {
             extractHashCodeSpan.addEvent("Error during XLSX to CSV conversion");
             extractHashCodeSpan.setAttribute("conversion_error", true);
-            log.error("Error al transformar el fichero Xlsx a Csv", e1);
+            //log.error("Error al transformar el fichero Xlsx a Csv", e1);
             extractHashCodeSpan.recordException(e1);
         }
 
@@ -621,7 +612,7 @@ protected void extractHashCode() {
         extractHashCodeSpan.recordException(e);
         extractHashCodeSpan.setAttribute("error", true);
         extractHashCodeSpan.setAttribute("error.message", e.getMessage());
-        log.error("Error leyendo fichero hashcode", e);
+        //log.error("Error leyendo fichero hashcode", e);
     } finally {
         extractHashCodeSpan.end();
     }
@@ -629,8 +620,8 @@ protected void extractHashCode() {
 
 
 	private void backup() {
-		log.debug("Init backup");
-		log.info("Comienza a hacerse el backup");
+		//log.debug("Init backup");
+		//log.info("Comienza a hacerse el backup");
 		File outputDirectoryFile = new File(outputFilesDirectoryString);
 		File hashCSVFile = new File(Prop.fileHashCSV);
 		File errorBigFile = new File(Prop.fileErrorBig);
@@ -699,8 +690,8 @@ protected void extractHashCode() {
 			log.error("Error haciendo backup", e);
 		}
 
-		log.info("Finaliza de hacerse el backup");
-		log.debug("End backup");
+		//log.info("Finaliza de hacerse el backup");
+		//log.debug("End backup");
 	}
 
 	public List<String> getChanges() {
@@ -730,7 +721,7 @@ protected void extractHashCode() {
 	public static void main(String[] args) {
 		if ((log == null) || (log.getLevel() == null))
 			PropertyConfigurator.configure("log4j.properties");
-			log.info("Start process");
+			//log.info("Start process");
 			Prop.loadConf();
 			GenerateCSV app = new GenerateCSV(args[1], args[2]);
 //			app.backup();
@@ -739,7 +730,7 @@ protected void extractHashCode() {
 			}else if(args[0].equals("generateHash")){
 				app.generateHashCodeFromBI();
 			}
-			log.info("Finish process");
+			//log.info("Finish process");
 		}
 
 }

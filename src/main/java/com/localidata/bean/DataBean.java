@@ -274,7 +274,7 @@ public class DataBean {
 			mergeSkosSpan.setAttribute("data.name", data.getName());
 			mergeSkosSpan.setAttribute("mapSkos.size", this.mapSkos.size());
 
-			log.debug("init mergeSkos " + data);
+			//log.debug("init mergeSkos " + data);
 			HashMap<String, SkosBean> mapSkos = null;
 			mapSkos = (HashMap<String, SkosBean>) this.mapSkos.clone();
 			if (this.equals(data)) {
@@ -319,7 +319,7 @@ public class DataBean {
 					mergeSkosSpan.addEvent("URI updated for SKOS entry", Attributes.of(AttributeKey.stringKey("skos_id"), skosSource.getId(), AttributeKey.stringKey("updated_URI"), skosSource.getURI()));
 				}
 			}
-			log.debug("end mergeSkos " + data);
+			//log.debug("end mergeSkos " + data);
 			mergeSkosSpan.setAttribute("mapSkos.final_size", mapSkos.size());
 			return mapSkos;
 		}catch (Exception e) {
