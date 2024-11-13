@@ -208,12 +208,11 @@ public class GenerateRDF {
 		// Span readCsvSpan = tracer.spanBuilder("Read CSV File: " + file.getName())
         //                      .setSpanKind(SpanKind.INTERNAL)
         //                      .startSpan();
-
-
 		log.debug("Init readCsv");
 		List<String> csvLines;
 		//try (Scope scopeReadCsvSpan = readCsvSpan.makeCurrent()) {
-
+		try{
+		
 			csvLines = FileUtils.readLines(file, "UTF-8");
 
 			String[] cellsName = csvLines.get(0).split(",");
@@ -240,15 +239,12 @@ public class GenerateRDF {
 				cellsKosNameNormalized = csvLines.get(11).split(",");
 
 			int columnReaded = 0;
-
-			// readCsvSpan.setAttribute("file.row_count", csvLines.size());
-			// readCsvSpan.setAttribute("config.id", configBean.getId());
-
+				
 			while (columnReaded < cellsName.length) {
 
 				// Span columnSpan = tracer.spanBuilder("Process CSV Column: " + columnReaded)
-                //                     .setSpanKind(SpanKind.INTERNAL)
-                //                     .startSpan();
+				//                     .setSpanKind(SpanKind.INTERNAL)
+				//                     .startSpan();
 				// try (Scope columnScope = columnSpan.makeCurrent()) {
 					DataBean dataBean = new DataBean();
 					if (cellsName[columnReaded] == null) {
@@ -312,12 +308,15 @@ public class GenerateRDF {
 				// 	columnSpan.end();
 				// }
 			}
-		// } catch (IOException e) {
-		// 	log.error("Error reading CSV file", e);
-		// 	readCsvSpan.recordException(e);
-		// } finally {
-		// 	readCsvSpan.end();
-		// }
+		} catch (IOException e) {
+			log.error("Error reading CSV file", e);
+		}
+			// } catch (IOException e) {
+			// 	log.error("Error reading CSV file", e);
+			// 	readCsvSpan.recordException(e);
+			// } finally {
+			// 	readCsvSpan.end();
+			// }
 		log.debug("End readCsv");
 	}
 
