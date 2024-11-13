@@ -106,13 +106,13 @@ public class TransformToRDF {
 				for (int h = 0; h < csvLines.size(); h++) {
 					if (h == (int) (csvLines.size() * 0.75)) {
 						log.info("\tProcesed 75%");
-						initTransformationSpan.addEvent("Processed 75%");
+						//initTransformationSpan.addEvent("Processed 75%");
 					} else if (h == (int) (csvLines.size() * 0.5)) {
 						log.info("\tProcesed 50%");
-						initTransformationSpan.addEvent("Processed 50%");
+						//initTransformationSpan.addEvent("Processed 50%");
 					} else if (h == (int) (csvLines.size() * 0.25)){
 						log.info("\tProcesed 25%");
-						initTransformationSpan.addEvent("Processed 25%");
+						//initTransformationSpan.addEvent("Processed 25%");
 					}
 						
 					String dirtyLine = csvLines.get(h);
@@ -324,7 +324,7 @@ public class TransformToRDF {
 									Matcher m = r.matcher(cell);
 
 									if (m.find()) {
-										String errorMessage = String.valueOf(fileName) + ". WARNING. Column " + header + ". MIXED CODE AND VALUE";
+										errorMessage = String.valueOf(fileName) + ". WARNING. Column " + header + ". MIXED CODE AND VALUE";
 										insertError(errorMessage);
 										cell = cell.substring(cell.indexOf("-") + 1, cell.length());
 										// addObservationSpan.setAttribute("error", true);
@@ -339,14 +339,14 @@ public class TransformToRDF {
 						} else {
 							if (header.equals("")) {
 								
-								String errorMessage = String.valueOf(fileName) + ". ERROR. HEADER COLUMN EMPTY " + ". CONFIGURATION FOR THIS COLUMN NOT FOUND ";
+								errorMessage = String.valueOf(fileName) + ". ERROR. HEADER COLUMN EMPTY " + ". CONFIGURATION FOR THIS COLUMN NOT FOUND ";
 								insertError(errorMessage);
 								log.error(errorMessage);
 
 								// addObservationSpan.setAttribute("error", true);
             					// addObservationSpan.setAttribute("error.message", errorMessage);
 							} 
-							String errorMessage = String.valueOf(fileName) + ". ERROR. Column " + header + ". CONFIGURATION FOR THIS COLUMN NOT FOUND ";
+							errorMessage = String.valueOf(fileName) + ". ERROR. Column " + header + ". CONFIGURATION FOR THIS COLUMN NOT FOUND ";
 							insertError(errorMessage);
 							log.error(errorMessage);
 							// addObservationSpan.setAttribute("error", true);

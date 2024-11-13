@@ -806,7 +806,7 @@ public class GenerateRDF {
 							List<String> csvLines = FileUtils.readLines(file, "UTF-8");
 							String description = idDescription.get(fileName + fileLetter);
 
-							fileProcessingSpan.setAttribute("output.file", outputDirectoryFile);
+							fileProcessingSpan.setAttribute("output.file", outputDirectoryString + File.separator + "DatosTTL" + File.separator + "informes" + File.separator + fileName + fileLetter + ".ttl");
 
 							if (description != null) {
 								fileProcessingSpan.setAttribute("file.description", description);
