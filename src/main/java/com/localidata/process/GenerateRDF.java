@@ -205,14 +205,14 @@ public class GenerateRDF {
 
 	private void readCsv(File file, ConfigBean configBean) {
 
-		Span readCsvSpan = tracer.spanBuilder("Read CSV File: " + file.getName())
-                             .setSpanKind(SpanKind.INTERNAL)
-                             .startSpan();
+		// Span readCsvSpan = tracer.spanBuilder("Read CSV File: " + file.getName())
+        //                      .setSpanKind(SpanKind.INTERNAL)
+        //                      .startSpan();
 
 
 		log.debug("Init readCsv");
 		List<String> csvLines;
-		try (Scope scopeReadCsvSpan = readCsvSpan.makeCurrent()) {
+		//try (Scope scopeReadCsvSpan = readCsvSpan.makeCurrent()) {
 
 			csvLines = FileUtils.readLines(file, "UTF-8");
 
@@ -241,15 +241,15 @@ public class GenerateRDF {
 
 			int columnReaded = 0;
 
-			readCsvSpan.setAttribute("file.row_count", csvLines.size());
-			readCsvSpan.setAttribute("config.id", configBean.getId());
+			// readCsvSpan.setAttribute("file.row_count", csvLines.size());
+			// readCsvSpan.setAttribute("config.id", configBean.getId());
 
 			while (columnReaded < cellsName.length) {
 
-				Span columnSpan = tracer.spanBuilder("Process CSV Column: " + columnReaded)
-                                    .setSpanKind(SpanKind.INTERNAL)
-                                    .startSpan();
-				try (Scope columnScope = columnSpan.makeCurrent()) {
+				// Span columnSpan = tracer.spanBuilder("Process CSV Column: " + columnReaded)
+                //                     .setSpanKind(SpanKind.INTERNAL)
+                //                     .startSpan();
+				// try (Scope columnScope = columnSpan.makeCurrent()) {
 					DataBean dataBean = new DataBean();
 					if (cellsName[columnReaded] == null) {
 						columnReaded++;
@@ -267,7 +267,7 @@ public class GenerateRDF {
 						}
 						dataBean.setType(type);
 						if (Utils.v(removeStartEndCaracter(cellsSkosfile[columnReaded]))) {
-							columnSpan.addEvent("Processing SKOS file for column " + columnReaded);
+							//columnSpan.addEvent("Processing SKOS file for column " + columnReaded);
 							HashMap<String, SkosBean> mapSkos = readMappingFileCSV(removeStartEndCaracter(cellsSkosfile[columnReaded]));
 							dataBean.setMapSkos(mapSkos);
 							configBean.getMapData().put(dataBean.getNameNormalized(), dataBean);
@@ -296,28 +296,28 @@ public class GenerateRDF {
 							dataBean.setKosName(dataBean.getName());
 						}
 
-						columnSpan.setAttribute("column.name", dataBean.getName());
-						columnSpan.setAttribute("column.type", dataBean.getType());
-						columnSpan.setAttribute("column.dimension_mesure", dataBean.getDimensionMesure());
-						if (dataBean.getConstant() != null) {
-							columnSpan.setAttribute("column.constant_value", dataBean.getConstant());
-						}
-						if (dataBean.getRelationKos() != null) {
-							columnSpan.setAttribute("column.relation_kos", dataBean.getRelationKos());
-						}
+						// columnSpan.setAttribute("column.name", dataBean.getName());
+						// columnSpan.setAttribute("column.type", dataBean.getType());
+						// columnSpan.setAttribute("column.dimension_mesure", dataBean.getDimensionMesure());
+						// if (dataBean.getConstant() != null) {
+						// 	columnSpan.setAttribute("column.constant_value", dataBean.getConstant());
+						// }
+						// if (dataBean.getRelationKos() != null) {
+						// 	columnSpan.setAttribute("column.relation_kos", dataBean.getRelationKos());
+						// }
 
 						columnReaded++;
 					}
-				} finally {
-					columnSpan.end();
-				}
+				// } finally {
+				// 	columnSpan.end();
+				// }
 			}
-		} catch (IOException e) {
-			log.error("Error reading CSV file", e);
-			readCsvSpan.recordException(e);
-		} finally {
-			readCsvSpan.end();
-		}
+		// } catch (IOException e) {
+		// 	log.error("Error reading CSV file", e);
+		// 	readCsvSpan.recordException(e);
+		// } finally {
+		// 	readCsvSpan.end();
+		// }
 		log.debug("End readCsv");
 	}
 
@@ -337,13 +337,13 @@ public class GenerateRDF {
 	private void readXlsxFile(File file, ConfigBean configBean) {
 		log.debug("Init readXlsxFile");
 
-		Span readXlsxFileSpan = tracer.spanBuilder("Read XLSX File: " + file.getName())
-                                  .setSpanKind(SpanKind.INTERNAL)
-                                  .startSpan();
+		// Span readXlsxFileSpan = tracer.spanBuilder("Read XLSX File: " + file.getName())
+        //                           .setSpanKind(SpanKind.INTERNAL)
+        //                           .startSpan();
 
-		readXlsxFileSpan.setAttribute("config.id", configBean.getId());
+		// readXlsxFileSpan.setAttribute("config.id", configBean.getId());
 
-		try (Scope scopeReadXlsxFileSpan = readXlsxFileSpan.makeCurrent()) {
+		// try (Scope scopeReadXlsxFileSpan = readXlsxFileSpan.makeCurrent()) {
 
 			InputStream inp = null;
 			Workbook wb = null;
@@ -352,13 +352,13 @@ public class GenerateRDF {
 				wb = WorkbookFactory.create(inp);
 			} catch (FileNotFoundException e) {
 				log.error(e.getMessage());
-				readXlsxFileSpan.recordException(e);
+				//readXlsxFileSpan.recordException(e);
 			} catch (InvalidFormatException e) {
 				log.error(e.getMessage());
-				readXlsxFileSpan.recordException(e);
+				//readXlsxFileSpan.recordException(e);
 			} catch (IOException e) {
 				log.error(e.getMessage());
-				readXlsxFileSpan.recordException(e);
+				//readXlsxFileSpan.recordException(e);
 			}
 
 			Sheet sheet = wb.getSheetAt(0);
@@ -377,12 +377,12 @@ public class GenerateRDF {
 			boolean cont = true;
 			int columnReaded = 0;
 			while (cont) {
-				Span columnSpan = tracer.spanBuilder("Process XLSX Column: " + columnReaded)
-					.setParent(Context.current().with(readXlsxFileSpan))
-					.setSpanKind(SpanKind.INTERNAL)
-					.startSpan();
+				// Span columnSpan = tracer.spanBuilder("Process XLSX Column: " + columnReaded)
+				// 	.setParent(Context.current().with(readXlsxFileSpan))
+				// 	.setSpanKind(SpanKind.INTERNAL)
+				// 	.startSpan();
 
-                try (Scope columnScope = columnSpan.makeCurrent()) {
+                //try (Scope columnScope = columnSpan.makeCurrent()) {
 
 					Cell cellName = rowName.getCell(columnReaded);
 					Cell cellNameNormalized = rowNameNormalized.getCell(columnReaded);
@@ -416,7 +416,7 @@ public class GenerateRDF {
 							columnReaded++;
 					} else {
 						dataBean.setName(cellName.getStringCellValue());
-						columnSpan.setAttribute("column.name", dataBean.getName());
+						//columnSpan.setAttribute("column.name", dataBean.getName());
 						if(cellNameNormalized!=null){
 							dataBean.setNameNormalized(cellNameNormalized.getStringCellValue());
 						}else{
@@ -429,7 +429,7 @@ public class GenerateRDF {
 						}
 						if(cellDimMesure!=null){
 							dataBean.setDimensionMesure(cellDimMesure.getStringCellValue());
-							columnSpan.setAttribute("column.dimension_mesure", dataBean.getDimensionMesure());
+							//columnSpan.setAttribute("column.dimension_mesure", dataBean.getDimensionMesure());
 						}else{
 							log.error("Error in config "+file.getName()+" in cell dim mesure");
 						}
@@ -441,7 +441,7 @@ public class GenerateRDF {
 							type = "xsd:string";
 						}
 						dataBean.setType(type);
-						columnSpan.setAttribute("column.type", dataBean.getType());
+						//columnSpan.setAttribute("column.type", dataBean.getType());
 						if (cellSkosfile != null && !cellSkosfile.getStringCellValue().equals("")) {
 							HashMap<String, SkosBean> mapSkos = readMappingFile(cellSkosfile.getStringCellValue());
 							dataBean.setMapSkos(mapSkos);
@@ -476,16 +476,16 @@ public class GenerateRDF {
 
 						columnReaded++;
 					}
-				} finally {
-                    columnSpan.end();
-                }
+				// } finally {
+                //     columnSpan.end();
+                // }
 			}
 
-		} catch (Exception e) {
-			readXlsxFileSpan.recordException(e);
-		} finally {
-			readXlsxFileSpan.end();
-		}
+		// } catch (Exception e) {
+		// 	readXlsxFileSpan.recordException(e);
+		// } finally {
+		// 	readXlsxFileSpan.end();
+		// }
 
 		log.debug("End readXlsxFile");
 
