@@ -26,11 +26,11 @@
                         <artifactId>opentelemetry-sdk</artifactId>
                         <version>1.9.1</version>
                 </dependency>
-                <dependency>
+                <!-- <dependency>
                         <groupId>io.opentelemetry</groupId>
                         <artifactId>opentelemetry-exporter-jaeger</artifactId>
                         <version>1.9.1</version>
-                </dependency>
+                </dependency> -->
                 <dependency>
                         <groupId>io.opentelemetry</groupId>
                         <artifactId>opentelemetry-sdk-extension-autoconfigure</artifactId>

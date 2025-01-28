@@ -7,7 +7,6 @@ import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
-import io.opentelemetry.exporter.jaeger.JaegerGrpcSpanExporter;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 import io.opentelemetry.sdk.resources.Resource;
@@ -27,10 +26,9 @@ public class OpenTelemetryConfig {
                 throw new RuntimeException("Failed to load configuration properties");
             }
 
-            String jaegerEndpoint = Prop.jaegerEndpoint;
-
-            if (jaegerEndpoint == null || !jaegerEndpoint.startsWith("http://") && !jaegerEndpoint.startsWith("https://")) {
-                throw new IllegalArgumentException("Invalid Jaeger endpoint: " + jaegerEndpoint);
+            String apmEndpoint = Prop.apmOtlpEndpoint;
+            if (apmEndpoint == null) {
+                throw new IllegalArgumentException("Missing APM OTLP endpoint config");
             }
 
             Resource resource = Resource.create(
@@ -38,8 +36,8 @@ public class OpenTelemetryConfig {
             );
 
             OtlpGrpcSpanExporter otlpExporter = OtlpGrpcSpanExporter.builder()
-                    .setEndpoint(jaegerEndpoint)
-                    .setTimeout(java.time.Duration.ofSeconds(30))
+                    .setEndpoint(apmEndpoint)
+                    .setTimeout(Duration.ofSeconds(30))
                     .build();
 
             BatchSpanProcessor batchSpanProcessor = BatchSpanProcessor.builder(otlpExporter)
