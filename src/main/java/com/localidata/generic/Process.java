@@ -1,9 +1,10 @@
 package com.localidata.generic;
 
-// import io.opentelemetry.api.GlobalOpenTelemetry;
-// import io.opentelemetry.api.trace.Span;
-// import io.opentelemetry.api.trace.Tracer;
-// import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.context.Scope;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,6 +17,7 @@ import com.localidata.extract.GenerateCSV;
 import com.localidata.process.GenerateRDF;
 import com.localidata.process.TransformToRDF;
 import com.localidata.transform.GenerateConfig;
+import com.localidata.util.OpenTelemetryConfig;
 
 /**
  * 
@@ -24,18 +26,11 @@ import com.localidata.transform.GenerateConfig;
  */
 public class Process {
 
-	//private static final Tracer tracer = GlobalOpenTelemetry.getTracer("com.localidata.generic.Process");
 
 	public static void main(String[] args) {
 
-		//OpenTelemetryConfig.initOpenTelemetry();
-		
 		Logger log = Logger.getLogger(Process.class);
 		PropertyConfigurator.configure("log4j.properties");
-
-		// Span mainSpan = tracer.spanBuilder("ETL Main Process")
-        //         .setSpanKind(SpanKind.SERVER)
-        //         .startSpan();
 		
 		if (args[0].equals("config")) {
 			GenerateConfig.main(args);
@@ -66,42 +61,52 @@ public class Process {
 			log.info("End configTest");
 			
 		} else if (args[0].equals("update")) {
-			// Span updateSpan = tracer.spanBuilder("Update Process")
-            //             .setParent(mainSpan)
-            //             .startSpan();
 
-			PropertyConfigurator.configure("log4j.properties");
-			log.info("Start process");
 			Prop.loadConf();
-			GenerateCSV csv = new GenerateCSV(args[1], args[2]);
-			csv.extractFiles();
+			OpenTelemetryConfig.initialize();
 
-			if (csv.getChanges().size() > 0 || csv.getNews().size() > 0) {
-				log.info("Cantidad de cubos nuevos: " + csv.getNews().size());
-				log.info("El procese de actualización ha detectado "+csv.getChanges().size()+" cambios y "+csv.getNews().size()+" nuevos");
-				
-				GenerateRDF rdf = new GenerateRDF(args[2], args[4], args[3], args[1], args[5]);
-				rdf.readConfig(csv.getIdDescription());
-				
-				GenerateConfig config = new GenerateConfig(args[2], "", args[3], args[1]);
-				config.updateConfig(csv.getChanges(), csv.getNews(), rdf.getMapconfig());
+			Span updateSpan = OpenTelemetryConfig.getTracer().spanBuilder("Update Process")
+						.setSpanKind(SpanKind.SERVER)
+						.startSpan();
 
-				if (csv.getNews().size() == 0 && config.getFilesNotRDF().size() == csv.getChanges().size()) {
-					log.info("Todos los cambios requieren cambio de configuración y no se generan nuevos ttl");
-					System.exit(0);
+			try (Scope scope = updateSpan.makeCurrent()) {
+
+				PropertyConfigurator.configure("log4j.properties");
+				log.info("Start process");
+				
+				GenerateCSV csv = new GenerateCSV(args[1], args[2]);
+				csv.extractFiles();
+
+				if (csv.getChanges().size() > 0 || csv.getNews().size() > 0) {
+					log.info("Cantidad de cubos nuevos: " + csv.getNews().size());
+					log.info("El procese de actualización ha detectado "+csv.getChanges().size()+" cambios y "+csv.getNews().size()+" nuevos");
+					
+					GenerateRDF rdf = new GenerateRDF(args[2], args[4], args[3], args[1], args[5]);
+					rdf.readConfig(csv.getIdDescription());
+					
+					GenerateConfig config = new GenerateConfig(args[2], "", args[3], args[1]);
+					config.updateConfig(csv.getChanges(), csv.getNews(), rdf.getMapconfig());
+
+					if (csv.getNews().size() == 0 && config.getFilesNotRDF().size() == csv.getChanges().size()) {
+						log.info("Todos los cambios requieren cambio de configuración y no se generan nuevos ttl");
+						System.exit(0);
+					}
+
+					rdf.setFilesNotRDF(config.getFilesNotRDF());
+					rdf.delete();
+					List<String> result = rdf.writeInformationTTL();
+					rdf.writeSkosTTL();
+					rdf.zipFiles();
+					csv.generateHashCode(result,csv.getNews());
+
+				} else {
+					log.info("No hay cambios");
 				}
+				log.info("end update");
 
-				rdf.setFilesNotRDF(config.getFilesNotRDF());
-				rdf.delete();
-				List<String> result = rdf.writeInformationTTL();
-				rdf.writeSkosTTL();
-				rdf.zipFiles();
-				csv.generateHashCode(result,csv.getNews());
-
-			} else {
-				log.info("No hay cambios");
+			} finally {
+				updateSpan.end();
 			}
-			log.info("end update");
 		}
 	}
 

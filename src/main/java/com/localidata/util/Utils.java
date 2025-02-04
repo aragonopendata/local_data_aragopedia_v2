@@ -775,7 +775,7 @@ public class Utils {
 
 	public static String processURLGet(String url, String urlParameters, Map<String, String> headers) {
 
-		log.debug("processURLGet url " + url + " urlParameters " + urlParameters + " headers " + headers);
+		//log.debug("processURLGet url " + url + " urlParameters " + urlParameters + " headers " + headers);
 		StringBuffer sb = new StringBuffer();
 		HttpURLConnection httpConnection = null;
 		try {
@@ -785,7 +785,7 @@ public class Utils {
 			} else {
 				targetUrl = new URL(url + "?" + urlParameters);
 			}
-			log.debug("targetUrl " + targetUrl.toString());
+			//log.debug("targetUrl " + targetUrl.toString());
 			httpConnection = (HttpURLConnection) targetUrl.openConnection();
 			httpConnection.setDoOutput(true);
 			httpConnection.setRequestMethod("GET");
@@ -833,7 +833,7 @@ public class Utils {
 	
 	public static String processURLGet(String URI) throws IOException {
 
-		log.info("processURLGet: " + URI);
+		//log.info("processURLGet: " + URI);
 
 		StringBuilder content = new StringBuilder();
 
@@ -1232,7 +1232,7 @@ public class Utils {
 				"}";
 		try {
 			String response = Utils.processURLPost("https://api.github.com/repos/aragonopendata/local-data-aragopedia/issues", "", headers, body);
-			log.info("response " + response);
+			//log.info("response " + response);
 		} catch (IOException e) {
 			log.error("Error en main", e);
 		}
