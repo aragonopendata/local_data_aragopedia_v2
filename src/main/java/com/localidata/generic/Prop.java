@@ -15,6 +15,10 @@ import org.apache.log4j.Logger;
 public class Prop {
 
 	private final static Logger log = Logger.getLogger(Prop.class);
+	
+	public static String specificCubeId = "";
+	public static boolean processOnlySpecificCube = false;
+	
 	public static String domainPermission = "";
 	public static String p12File = "";
 	public static String acountId = "";
@@ -132,6 +136,12 @@ public class Prop {
 			apmOtlpEndpoint = prop.getProperty("apmOtlpEndpoint");
 
 			conf = true;
+			processOnlySpecificCube = Boolean.parseBoolean(prop.getProperty("process.only.specific.cube", "false"));
+			specificCubeId = prop.getProperty("specific.cube.id", "");
+
+			if (processOnlySpecificCube) {
+				log.info("Modo de procesamiento de cubo específico activado: " + specificCubeId);
+			}
 		} catch (IOException io) {
 			log.error("Error loading configuration", io);
 		}
