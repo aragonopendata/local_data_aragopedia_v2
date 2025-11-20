@@ -158,15 +158,15 @@ public class GenerateCSV {
 					valores[2] = valores[2].replaceAll("\"", "");
 					idDescription.put(valores[1], valores[2]);
 											
-					// **NUEVO: Filtro para procesar solo un cubo específico**
-					if (Prop.processOnlySpecificCube && !valores[1].equals(Prop.specificCubeId)) {
-						log.info("Saltando cubo " + valores[1] + " (no coincide con el filtro: " + Prop.specificCubeId + ")");
-						continue;
-					}
-					
-					log.info("Procesando cubo: " + valores[1]);
-					idDescription.put(valores[1], valores[2]);
-					
+					                // **NUEVO: Filtro para procesar solo un cubo específico**
+									if (!valores[1].equals("915-150011TM")) {
+										log.info("Saltando cubo " + valores[1] + " (no coincide con el filtro: " + Prop.specificCubeId + ")");
+										continue;
+									}
+									
+									log.info("Procesando cubo: " + valores[1]);
+									idDescription.put(valores[1], valores[2]);
+									
 					content = Utils.processURLGet(Prop.urlBiAragon + valores[0] + "&Action=Download&Options=df", "", headers, cookies, "ISO-8859-1");
 					
 					// Calculamos el numero de bytes que ocupa el string en local
