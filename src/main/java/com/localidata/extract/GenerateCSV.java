@@ -158,10 +158,10 @@ public class GenerateCSV {
 					valores[2] = valores[2].replaceAll("\"", "");
 											
 					                // **NUEVO: Filtro para procesar solo un cubo específico**
-									if (!valores[1].equals("915-150007TM")) {
-										log.info("Saltando cubo " + valores[1] + " (no coincide con el filtro: " + Prop.specificCubeId + ")");
-										continue;
-									}
+									// if (!valores[1].equals("915-150007TM")) {
+									// 	log.info("Saltando cubo " + valores[1] + " (no coincide con el filtro: " + Prop.specificCubeId + ")");
+									// 	continue;
+									// }
 									
 									log.info("Procesando cubo: " + valores[1]);
 									idDescription.put(valores[1], valores[2]);
