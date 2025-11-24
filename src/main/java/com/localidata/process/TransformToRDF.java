@@ -277,16 +277,18 @@ public class TransformToRDF {
 								} else if (!dataBean.getType().contains("URI")) {
 									if (!dataBean.getNormalizacion().equals("sdmx-dimension:refPeriod")) {
 										if (dataBean.getType().equals("skos:Concept")) {
-											if (dataBean.getMapSkos().get(normalizedCell) == null) {
-												errorMessage = fileName + ". ERROR. Column " + header + ". NO SKOS VALID BY " + normalizedCell;
-												insertError(errorMessage);
-												log.error(errorMessage);
-
-												// addObservationSpan.setAttribute("error", true);
-            									// addObservationSpan.setAttribute("error.message", errorMessage);
+											// Intentamos obtener el objeto SKOS del mapa
+											Object skosMapping = dataBean.getMapSkos().get(normalizedCell);
+											
+											if (skosMapping != null) {
+												// CASO 1: El mapeo existe correctamente -> Usamos la URI semántica
+												result.append("\t" + dataBean.getNormalizacion() + " <" + ((SkosBean)skosMapping).getURI() + "> ;" + "\n");
+												((SkosBean)skosMapping).setLabel(Utils.weakClean(cell));
 											} else {
-												result.append("\t" + dataBean.getNormalizacion() + " <" + ((SkosBean)dataBean.getMapSkos().get(normalizedCell)).getURI() + "> ;" + "\n");
-												((SkosBean)dataBean.getMapSkos().get(normalizedCell)).setLabel(Utils.weakClean(cell));
+												// CASO 2: No existe el mapeo o el fichero SKOS falló -> Usamos Texto Simple (FALLBACK)
+												// No lanzamos error, solo logueamos un warning y escribimos el dato como string
+												log.warn(fileName + ". WARNING. Column " + header + ". Value '" + normalizedCell + "' not found in SKOS or SKOS missing. Writing as Literal String.");
+												result.append("\t" + dataBean.getNormalizacion() + " \"" + Utils.weakClean(cell) + "\"^^xsd:string;" + "\n");
 											}
 										} else {
 											if (dataBean.getType().equals("xsd:double"))
@@ -500,32 +502,30 @@ public class TransformToRDF {
 											propertiesContent.append("\trdfs:comment \"" + Utils.weakClean(data.getKosName()) + "\"@es ;" + "\n");
 											propertiesContent.append("\trdfs:range " + data.getType());
 											if (data.getType().equals(Constants.skosType)) {
-												if (data.getMapSkos().keySet().size() > 0) {
+												// Verificamos si tenemos datos en el mapa SKOS
+												if (data.getMapSkos() != null && data.getMapSkos().keySet().size() > 0) {
 													String key = data.getMapSkos().keySet().iterator().next();
 													if (Utils.v(key)) {
-														String codeList = data.getMapSkos().get(key).getURI();
-														if (Utils.v(codeList)) {
+														SkosBean sb = data.getMapSkos().get(key);
+														if (sb != null && Utils.v(sb.getURI())) {
+															String codeList = sb.getURI();
 															propertiesContent.append(" ;" + "\n");
-															codeList = codeList.substring(0, codeList.lastIndexOf("/"));
+															// Intentamos obtener la raiz del codelist
+															if(codeList.contains("/")) {
+																codeList = codeList.substring(0, codeList.lastIndexOf("/"));
+															}
 															propertiesContent.append("\tqb:codeList <" + codeList + "> ." + "\n");
-														}else{
+														} else {
 															propertiesContent.append(".\n");
 														}
-													}else{
+													} else {
 														propertiesContent.append(".\n");
 													}
 												} else {
+													// FALLBACK: El tipo es SKOS pero no hay mapa (archivo perdido o vacío).
+													// Cerramos la definición sin añadir qb:codeList y SIN LANZAR ERROR.
 													propertiesContent.append(" ." + "\n");
-													if (Utils.weakClean(data.getName()).equals("")) {
-														TransformToRDF.insertError(config.getId() + ". ERROR. CELL EMPTY " + ". SKOS FOR THIS COLUMN NOT FOUND ");
-														log.error(config.getId() + ". ERROR. CELL EMPTY " + ". SKOS FOR THIS COLUMN NOT FOUND ");
-														dataSpan.setAttribute("otel.status_code", "ERROR");
-														dataSpan.setAttribute("error.message", config.getId() + ". ERROR. CELL EMPTY " + ". SKOS FOR THIS COLUMN NOT FOUND ");
-													}
-													TransformToRDF.insertError(config.getId() + ". ERROR. Column " + Utils.weakClean(data.getName()) + ". SKOS FOR THIS COLUMN NOT FOUND ");
-													log.error(config.getId() + ". ERROR. Column " + Utils.weakClean(data.getName()) + ". SKOS FOR THIS COLUMN NOT FOUND ");
-													dataSpan.setAttribute("otel.status_code", "ERROR");
-													dataSpan.setAttribute("error.message", config.getId() + ". ERROR. Column " + Utils.weakClean(data.getName()) + ". SKOS FOR THIS COLUMN NOT FOUND ");
+													log.warn(config.getId() + ". WARNING. Column " + Utils.weakClean(data.getName()) + " defined as SKOS but mapping is empty. Treated as plain property.");
 												}
 											} else {
 												propertiesContent.append(" ." + "\n");
