@@ -784,6 +784,13 @@ public class GenerateRDF {
 
 		List<String> result = new ArrayList<>();
 		File inputDirectoryFile = new File(inputDirectoryString);
+
+		File informesDir = new File(outputDirectoryString + File.separator + "DatosTTL" + File.separator + "informes");
+    if (!informesDir.exists()) {
+        log.info("Creando directorio de informes: " + informesDir.getAbsolutePath());
+        informesDir.mkdirs(); // Esto crea la carpeta 'informes' y las intermedias si faltan
+    }
+	
 		File propertiesFile = new File(outputDirectoryString + File.separator + "DatosTTL" + File.separator + "codelists" + File.separator + "properties.ttl");
 		File dsdFile = new File(outputDirectoryString + File.separator + "DatosTTL" + File.separator + "dataStructures" + File.separator + "dsd.ttl");
 		File errorReportFile = new File("errorReport.txt");
