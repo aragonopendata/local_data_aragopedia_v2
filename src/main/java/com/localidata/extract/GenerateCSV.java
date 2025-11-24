@@ -61,8 +61,7 @@ public class GenerateCSV {
 			generateCSVSpan.setAttribute(AttributeKey.stringKey("urlsFileString"), urlsFileString);
 			generateCSVSpan.setAttribute(AttributeKey.stringKey("outputFilesDirectoryString"), outputFilesDirectoryString);
 
-			//Debug temporal
-			//Jdbcconnection.main(null);
+			Jdbcconnection.main(null);
 		} catch (Exception e) {
 			generateCSVSpan.setAttribute("error", true);
             generateCSVSpan.setAttribute("error.message", e.getMessage());
