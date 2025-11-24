@@ -790,7 +790,7 @@ public class GenerateRDF {
         log.info("Creando directorio de informes: " + informesDir.getAbsolutePath());
         informesDir.mkdirs(); // Esto crea la carpeta 'informes' y las intermedias si faltan
     }
-	
+
 		File propertiesFile = new File(outputDirectoryString + File.separator + "DatosTTL" + File.separator + "codelists" + File.separator + "properties.ttl");
 		File dsdFile = new File(outputDirectoryString + File.separator + "DatosTTL" + File.separator + "dataStructures" + File.separator + "dsd.ttl");
 		File errorReportFile = new File("errorReport.txt");
@@ -824,7 +824,7 @@ public class GenerateRDF {
 					fileProcessingSpan.setAttribute("file.number", numfile);
 					fileProcessingSpan.setAttribute("file.total", listCSV.size());
 
-					if (!filesNotRDF.contains(fileName + fileLetter)) {
+					//if (!filesNotRDF.contains(fileName + fileLetter)) {
 						ConfigBean configBean = mapconfig.get(fileName);
 						if (configBean != null) {
 							File outputDirectoryFile = new File(outputDirectoryString + File.separator + "DatosTTL" + File.separator + "informes" + File.separator + fileName + fileLetter + ".ttl");
@@ -852,7 +852,7 @@ public class GenerateRDF {
 							fileProcessingSpan.setAttribute("error", true);
 						}
 						numfile++;
-					}
+					//}
 				} catch (Exception e) {
 					log.error("Error al extraer la información ", e);
 					fileProcessingSpan.setAttribute("error", true);
