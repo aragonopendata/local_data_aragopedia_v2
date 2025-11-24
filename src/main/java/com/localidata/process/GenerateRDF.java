@@ -262,12 +262,22 @@ public class GenerateRDF {
 							type = "xsd:string";
 						}
 						dataBean.setType(type);
-						if (Utils.v(removeStartEndCaracter(cellsSkosfile[columnReaded]))) {
-							//columnSpan.addEvent("Processing SKOS file for column " + columnReaded);
-							HashMap<String, SkosBean> mapSkos = readMappingFileCSV(removeStartEndCaracter(cellsSkosfile[columnReaded]));
-							dataBean.setMapSkos(mapSkos);
-							configBean.getMapData().put(dataBean.getNameNormalized(), dataBean);
-							dataWithSkos.add(dataBean);
+						String skosFileName = removeStartEndCaracter(cellsSkosfile[columnReaded]);
+						if (Utils.v(skosFileName)) {
+							// Intentamos cargar el SKOS
+							HashMap<String, SkosBean> mapSkos = readMappingFileCSV(skosFileName);
+							
+							// CAMBIO: Verificamos si realmente se cargaron datos
+							if (mapSkos != null && !mapSkos.isEmpty()) {
+								dataBean.setMapSkos(mapSkos);
+								configBean.getMapData().put(dataBean.getNameNormalized(), dataBean);
+								dataWithSkos.add(dataBean);
+							} else {
+								// FALLBACK: Si falla, avisamos por log y lo tratamos como texto normal
+								log.warn("ATENCION (CSV): El fichero SKOS '" + skosFileName + "' no existe o esta vacio. La columna '" + dataBean.getName() + "' se procesara como TEXTO SIMPLE.");
+								// Al no añadirlo a 'dataWithSkos' ni setear el mapa, se tratará como dato simple
+								configBean.getMapData().put(dataBean.getNameNormalized(), dataBean);
+							}
 						} else {
 							configBean.getMapData().put(dataBean.getNameNormalized(), dataBean);
 						}
@@ -441,11 +451,21 @@ public class GenerateRDF {
 						}
 						dataBean.setType(type);
 						//columnSpan.setAttribute("column.type", dataBean.getType());
-						if (cellSkosfile != null && !cellSkosfile.getStringCellValue().equals("")) {
-							HashMap<String, SkosBean> mapSkos = readMappingFile(cellSkosfile.getStringCellValue());
-							dataBean.setMapSkos(mapSkos);
-							configBean.getMapData().put(dataBean.getNameNormalized(), dataBean);
-							dataWithSkos.add(dataBean);
+						if (cellSkosfile != null && !cellSkosfile.getStringCellValue().trim().equals("")) {
+							String skosFileName = cellSkosfile.getStringCellValue();
+							// Intentamos cargar el SKOS
+							HashMap<String, SkosBean> mapSkos = readMappingFile(skosFileName);
+							
+							// CAMBIO: Verificamos si realmente se cargaron datos
+							if (mapSkos != null && !mapSkos.isEmpty()) {
+								dataBean.setMapSkos(mapSkos);
+								configBean.getMapData().put(dataBean.getNameNormalized(), dataBean);
+								dataWithSkos.add(dataBean);
+							} else {
+								// FALLBACK: Si falla, avisamos por log y lo tratamos como texto normal
+								log.warn("ATENCION (XLSX): El fichero SKOS '" + skosFileName + "' no existe o esta vacio. La columna '" + dataBean.getName() + "' se procesara como TEXTO SIMPLE.");
+								configBean.getMapData().put(dataBean.getNameNormalized(), dataBean);
+							}
 						} else {
 							configBean.getMapData().put(dataBean.getNameNormalized(), dataBean);
 						}
