@@ -156,7 +156,6 @@ public class GenerateCSV {
 					valores[0] = valores[0].replaceAll("\"", "");
 					valores[1] = valores[1].replaceAll("\"", "");
 					valores[2] = valores[2].replaceAll("\"", "");
-					idDescription.put(valores[1], valores[2]);
 											
 					                // **NUEVO: Filtro para procesar solo un cubo específico**
 									if (!valores[1].equals("915-150007TM")) {
