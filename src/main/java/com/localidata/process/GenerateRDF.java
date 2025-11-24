@@ -143,8 +143,6 @@ public class GenerateRDF {
 						mapconfig.put(id, configBean);
 						Utils.stringToFileAppend(id + " " + areas + "\n", areasReportFile);
 
-						log.info("fileName: " + fileName);
-						log.info("fileLetter: " + fileLetter);
 						log.info("outputDirectoryFile: " + outputDirectoryFile.getAbsolutePath());
 						
 						// Después de la transformación:
@@ -153,7 +151,7 @@ public class GenerateRDF {
 						} else {
 							log.error("✗ TTL NO FUE CREADO: " + outputDirectoryFile.getAbsolutePath());
 						}
-						
+
 					} finally {
                     	fileProcessingSpan.end();
                 	}
