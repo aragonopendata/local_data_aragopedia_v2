@@ -158,7 +158,7 @@ public class GenerateCSV {
 					valores[2] = valores[2].replaceAll("\"", "");
 											
 					                // **NUEVO: Filtro para procesar solo un cubo específico**
-									if (!valores[1].equals("02-020006TM")) {
+									if (!valores[1].equals("01-010037A")) {
 										log.info("Saltando cubo " + valores[1] + " (no coincide con el filtro: " + Prop.specificCubeId + ")");
 										continue;
 									}
