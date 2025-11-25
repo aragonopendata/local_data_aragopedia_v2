@@ -141,9 +141,6 @@ public class GenerateCSV {
 				}	
 			}
 
-			int cubosProcessados = 0;
-			final int MAX_CUBOS = 20;
-
 			for (int h = 1; h < csvLines.size(); h++) {
 
 				// Span downloadFilesSpan = tracer.spanBuilder("Download files in extractFiles")
@@ -160,14 +157,14 @@ public class GenerateCSV {
 					valores[1] = valores[1].replaceAll("\"", "");
 					valores[2] = valores[2].replaceAll("\"", "");
 											
-							if (cubosProcessados >= MAX_CUBOS) {
-								log.info("Se han procesado ya " + MAX_CUBOS + " cubos. Finalizando.");
-								break;
-							}
-							
-							log.info("Procesando cubo " + (cubosProcessados + 1) + " de " + MAX_CUBOS + ": " + valores[1]);
-							idDescription.put(valores[1], valores[2]);
-							cubosProcessados++;
+					                // **NUEVO: Filtro para procesar solo un cubo específico**
+									if (!valores[1].equals("03-030001TM")) {
+										log.info("Saltando cubo " + valores[1] + " (no coincide con el filtro: " + Prop.specificCubeId + ")");
+										continue;
+									}
+									
+									log.info("Procesando cubo: " + valores[1]);
+									idDescription.put(valores[1], valores[2]);
 									
 					content = Utils.processURLGet(Prop.urlBiAragon + valores[0] + "&Action=Download&Options=df", "", headers, cookies, "ISO-8859-1");
 					
