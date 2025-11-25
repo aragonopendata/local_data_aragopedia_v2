@@ -239,12 +239,12 @@ public class TransformToRDF {
 			}
 			String id = Utils.genUUIDHash(cleanLine);
 			// addObservationSpan.setAttribute("observationId", id);
-			log.info("id: " + id);
+			//log.info("id: " + id);
 
 			result.append("<" + Prop.host + "/" + Prop.eldaName + "/" + Prop.datasetName + "/observacion/" + fileName + "/" + id + "> a qb:Observation ;" + "\n");
 			result.append("\tqb:dataSet <" + cubo + ">; \n");
 
-			log.info("result: " + result);
+			//log.info("result: " + result);
 
 			String[] cells = cleanLine.split("\t");
 			int col = 1;
@@ -256,7 +256,7 @@ public class TransformToRDF {
 				String normalizedCell = Utils.urlify(cell);
 				String errorMessage = "";
 
-				log.info("normalizedCell: " + normalizedCell);
+				//log.info("normalizedCell: " + normalizedCell);
 
 
 				if (this.normalizedHeader.size() <= col - 1) {
@@ -266,7 +266,7 @@ public class TransformToRDF {
 					this.cleanHeader.get(col - 1);
 					DataBean dataBean = (DataBean)this.configBean.getMapData().get(header);
 
-					log.info("header: " + header);
+					//log.info("header: " + header);
 					//addObservationSpan.setAttribute("currentHeader", header);
 					try {
 						if (dataBean != null) {
