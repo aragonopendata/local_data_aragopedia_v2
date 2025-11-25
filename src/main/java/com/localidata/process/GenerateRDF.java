@@ -91,7 +91,7 @@ public class GenerateRDF {
 			
 			int size = listCSV.size();
 			for (File file : listCSV) {
-				log.info("Se extrae el fichero " + file.getName() + " " + (++cont) + " " + size);
+				//log.info("Se extrae el fichero " + file.getName() + " " + (++cont) + " " + size);
 				if (!file.getName().startsWith("mapping") && !file.getName().startsWith(Prop.fileHashCSV)) {
 
 					Span fileProcessingSpan = tracer.spanBuilder("Process Config File: " + file.getName())
